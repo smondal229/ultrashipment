@@ -11,7 +11,6 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.time.LocalDateTime;
 
 @Setter
 @Getter
@@ -27,6 +26,7 @@ public class ShipmentEntity {
     @Column(nullable = false)
     private String shipperName;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private String carrierName;
 

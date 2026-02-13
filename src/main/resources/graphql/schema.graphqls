@@ -1,7 +1,7 @@
 type Shipment {
     id: ID!
     shipperName: String!
-    carrierName: String!
+    carrierName: CarrierName!
     pickupLocation: String
     deliveryLocation: String
     trackingNumber: String
@@ -14,6 +14,13 @@ type Shipment {
     lengthCm: Float
     widthCm: Float
     heightCm: Float
+}
+
+enum CarrierName {
+    FEDEX
+    DHL
+    UPS
+    BLUEDART
 }
 
 type PageInfo {
