@@ -1,0 +1,123 @@
+type Shipment {
+    id: ID!
+    shipperName: String!
+    carrierName: String!
+    pickupLocation: String
+    deliveryLocation: String
+    trackingNumber: String
+    rate: Float
+    status: ShipmentStatus
+    shipmentDeliveryType: ShipmentDeliveryType
+    createdAt: String
+    updatedAt: String
+    weightGm: Float
+    lengthCm: Float
+    widthCm: Float
+    heightCm: Float
+}
+
+type PageInfo {
+    hasNextPage: Boolean!
+    endCursor: String
+}
+
+type ShipmentOutput {
+    shipments: [Shipment!]!
+    pageInfo: PageInfo!
+}
+
+enum ShipmentStatus {
+    CREATED
+    PICKED_UP
+    IN_TRANSIT
+    DELIVERED
+    CANCELLED
+}
+
+enum ShipmentDeliveryType {
+    STANDARD
+    EXPRESS
+    SAME_DAY
+}
+
+input ShipmentCreateInput {
+    shipperName: String!
+    carrierName: String!
+    pickupLocation: String!
+    deliveryLocation: String!
+    trackingNumber: String
+    rate: Float
+
+    status: ShipmentStatus
+    shipmentDeliveryType: ShipmentDeliveryType!
+
+    weightGm: Float
+    lengthCm: Float
+    widthCm: Float
+    heightCm: Float
+
+    pickedUpAt: String
+    deliveredAt: String
+}
+
+input ShipmentUpdateInput {
+    shipperName: String
+    carrierName: String
+    pickupLocation: String
+    deliveryLocation: String
+    trackingNumber: String
+    rate: Float
+    status: ShipmentStatus
+    shipmentDeliveryType: ShipmentDeliveryType
+    weightGm: Float
+    lengthCm: Float
+    widthCm: Float
+    heightCm: Float
+    pickedUpAt: String
+    deliveredAt: String
+}
+
+type Mutation {
+    createShipment(input: ShipmentCreateInput!): Shipment
+    updateShipment(id: ID!, input: ShipmentUpdateInput!): Shipment
+}
+
+enum ShipmentSortField {
+    ID
+    RATE
+}
+
+enum SortDirection {
+    ASC
+    DESC
+}
+
+input ShipmentSort {
+    field: ShipmentSortField = ID
+    direction: SortDirection = ASC
+}
+
+input FloatRange {
+    min: Float
+    max: Float
+}
+
+input ShipmentFilter {
+    carrier: [String!]
+    status: [ShipmentStatus!]
+    shipmentDeliveryType: [ShipmentDeliveryType!]
+    trackingNumber: String
+    shipperName: String
+    rate: FloatRange
+}
+
+type Query {
+    shipments(
+        pageSize: Int!
+        after: String
+        filters: ShipmentFilter
+        sort: ShipmentSort
+    ): ShipmentOutput
+
+    shipment(id: ID!): Shipment
+}
