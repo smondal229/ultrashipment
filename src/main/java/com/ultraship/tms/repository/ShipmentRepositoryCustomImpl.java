@@ -107,25 +107,10 @@ public class ShipmentRepositoryCustomImpl implements ShipmentRepositoryCustom {
 
         // Cursor filtering
         if (cursor != null) {
-            Comparable<?> sortValue = cursor.id();
+            Comparable<?> sortValue = cursor.fieldValue();
 
             Predicate primaryComparison = buildComparison(cb, sortPath, sortValue, asc);
-
-            if (sort.field() == ShipmentSort.Field.ID) {
-                predicates.add(primaryComparison);
-            } else {
-                Predicate tieBreaker = asc
-                        ? cb.and(
-                        cb.equal(sortPath, sortValue),
-                        cb.greaterThan(idPath, cursor.id())
-                )
-                        : cb.and(
-                        cb.equal(sortPath, sortValue),
-                        cb.lessThan(idPath, cursor.id())
-                );
-
-                predicates.add(cb.or(primaryComparison, tieBreaker));
-            }
+            predicates.add(primaryComparison);
         }
 
         cq.where(predicates.toArray(new Predicate[0]));
@@ -135,7 +120,6 @@ public class ShipmentRepositoryCustomImpl implements ShipmentRepositoryCustom {
             cq.orderBy(
                     asc ? cb.asc(idPath) : cb.desc(idPath)
             );
-
         } else {
             cq.orderBy(
                 asc ? List.of(cb.asc(sortPath), cb.asc(idPath)) : List.of(cb.desc(sortPath), cb.desc(idPath))

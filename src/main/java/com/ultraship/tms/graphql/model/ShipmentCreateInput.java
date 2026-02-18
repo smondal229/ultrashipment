@@ -1,5 +1,6 @@
 package com.ultraship.tms.graphql.model;
 
+import com.ultraship.tms.domain.Carrier;
 import com.ultraship.tms.domain.PaymentMeta;
 import com.ultraship.tms.domain.ShipmentDeliveryType;
 import com.ultraship.tms.domain.ShipmentStatus;
@@ -13,12 +14,13 @@ import java.time.Instant;
 public record ShipmentCreateInput(
         @NotBlank(message = "Shipper name is required")
         String shipperName,
-        @NotBlank(message = "Carrier name is required")
-        String carrierName,
+        @NotNull(message = "Carrier name is required")
+        Carrier carrierName,
         @NotBlank(message = "Pickup location is required")
         String pickupLocation,
         @NotBlank(message = "Delivery location is required")
         String deliveryLocation,
+        String currentLocation,
         String trackingNumber,
         @Positive(message = "Rate must be positive")
         BigDecimal rate,

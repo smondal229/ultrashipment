@@ -11,6 +11,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 @Setter
 @Getter
@@ -28,10 +30,14 @@ public class ShipmentEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String carrierName;
+    private Carrier carrierName;
 
+    @Column(nullable = false)
     private String pickupLocation;
+    @Column(nullable = false)
     private String deliveryLocation;
+
+    private String currentLocation;
 
     @Column(unique = true)
     private String trackingNumber;
@@ -62,4 +68,8 @@ public class ShipmentEntity {
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
     private PaymentMeta paymentMeta;
+
+    @OneToMany(mappedBy = "shipment", fetch = FetchType.LAZY)
+    @OrderBy("createdAt DESC")
+    private List<ShipmentTrackingEntity> tracking = new ArrayList<>();
 }

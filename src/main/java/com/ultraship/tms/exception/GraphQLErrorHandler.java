@@ -3,30 +3,144 @@ package com.ultraship.tms.exception;
 import graphql.GraphQLError;
 import graphql.GraphqlErrorBuilder;
 import graphql.schema.DataFetchingEnvironment;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.graphql.execution.DataFetcherExceptionResolverAdapter;
 import org.springframework.graphql.execution.ErrorType;
 import org.springframework.stereotype.Component;
+import org.springframework.validation.BindException;
+import org.springframework.validation.FieldError;
+
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 public class GraphQLErrorHandler extends DataFetcherExceptionResolverAdapter {
 
     @Override
     protected GraphQLError resolveToSingleError(Throwable ex, DataFetchingEnvironment env) {
-        if (ex instanceof ShipmentNotFoundException) {
+        if (ex instanceof ShipmentNotFoundException e) {
+            return buildError(e.getMessage(), ErrorType.NOT_FOUND);
+        }
+
+        if (ex instanceof InvalidShipmentStateException e) {
+            return buildError(e.getMessage(), ErrorType.BAD_REQUEST);
+        }
+
+        if (ex instanceof BindException e) {
+            return buildValidationError(e);
+        }
+
+        if (ex instanceof ConstraintViolationException e) {
+            return buildConstraintViolationError(e);
+        }
+
+        if (ex instanceof DataIntegrityViolationException e) {
+            return handleDataIntegrityViolation(e);
+        }
+
+        return buildError(
+                "Internal server error",
+                ErrorType.INTERNAL_ERROR
+        );
+    }
+
+    private GraphQLError buildError(String message, ErrorType errorType) {
+
+        return GraphqlErrorBuilder.newError()
+                .message(message)
+                .errorType(errorType)
+                .build();
+    }
+
+    private GraphQLError buildValidationError(BindException ex) {
+
+        Map<String, String> validationErrors =
+                ex.getFieldErrors()
+                        .stream()
+                        .collect(Collectors.toMap(
+                                FieldError::getField,
+                                FieldError::getDefaultMessage,
+                                (existing, replacement) -> existing
+                        ));
+
+        return GraphqlErrorBuilder.newError()
+                .message("Validation failed")
+                .errorType(ErrorType.BAD_REQUEST)
+                .extensions(Map.of(
+                        "validationErrors", validationErrors
+                ))
+                .build();
+    }
+
+    private GraphQLError handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+
+        String constraint = extractConstraintName(ex);
+
+        if ("uq_tracking_carrier".equalsIgnoreCase(constraint)) {
+
             return GraphqlErrorBuilder.newError()
-                    .message(ex.getMessage())
-                    .errorType(ErrorType.NOT_FOUND)
-                    .build();
-        } else if (ex instanceof InvalidShipmentStateException) {
-            return GraphqlErrorBuilder.newError()
-                    .message(ex.getMessage())
+                    .message("Shipment with this tracking number already exists for the carrier")
                     .errorType(ErrorType.BAD_REQUEST)
-                    .build();
-        } else {
-            return GraphqlErrorBuilder.newError()
-                    .message("Internal server error")
-                    .errorType(ErrorType.INTERNAL_ERROR)
+                    .extensions(Map.of(
+                            "code", "DUPLICATE_TRACKING_NUMBER"
+                    ))
                     .build();
         }
+
+        return GraphqlErrorBuilder.newError()
+                .message("Database constraint violation")
+                .errorType(ErrorType.INTERNAL_ERROR)
+                .build();
+    }
+
+    private String extractConstraintName(Throwable ex) {
+
+        Throwable cause = ex;
+
+        while (cause != null) {
+
+            if (cause instanceof org.hibernate.exception.ConstraintViolationException cve) {
+                return cve.getConstraintName();
+            }
+
+            cause = cause.getCause();
+        }
+
+        return null;
+    }
+
+    private GraphQLError buildConstraintViolationError(
+            jakarta.validation.ConstraintViolationException ex) {
+
+        Map<String, String> validationErrors =
+                ex.getConstraintViolations()
+                        .stream()
+                        .collect(Collectors.toMap(
+                                violation -> extractFieldName(violation.getPropertyPath().toString()),
+                                ConstraintViolation::getMessage,
+                                (existing, replacement) -> existing
+                        ));
+
+        return GraphqlErrorBuilder.newError()
+                .message("Validation failed")
+                .errorType(ErrorType.BAD_REQUEST)
+                .extensions(Map.of(
+                        "validationErrors", validationErrors
+                ))
+                .build();
+    }
+
+    private String extractFieldName(String propertyPath) {
+
+        if (propertyPath == null) return null;
+
+        String[] parts = propertyPath.split("\\.");
+
+        return parts.length > 0
+                ? parts[parts.length - 1]
+                : propertyPath;
     }
 }

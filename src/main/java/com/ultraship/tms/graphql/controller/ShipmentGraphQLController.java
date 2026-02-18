@@ -1,8 +1,8 @@
 package com.ultraship.tms.graphql.controller;
 
 import com.ultraship.tms.graphql.model.*;
-import com.ultraship.tms.mapper.ShipmentMapper;
 import com.ultraship.tms.service.ShipmentService;
+import graphql.schema.DataFetchingFieldSelectionSet;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.graphql.data.method.annotation.Argument;
@@ -15,15 +15,14 @@ import org.springframework.stereotype.Controller;
 public class ShipmentGraphQLController {
 
     private final ShipmentService service;
-    private final ShipmentMapper mapper;
 
-    @QueryMapping
-    public Shipment shipment(@Argument Long id) {
-        return mapper.toModel(service.getById(id));
+    @QueryMapping(name="getShipmentById")
+    public Shipment getShipmentById(@Argument Long id, DataFetchingFieldSelectionSet selectionSet) {
+        return service.getShipmentDetails(id, selectionSet.contains("tracking"));
     }
 
-    @QueryMapping
-    public ShipmentOutput shipments(
+    @QueryMapping(name="getShipments")
+    public ShipmentOutput getShipments(
             @Argument int pageSize,
             @Argument String after,
             @Argument ShipmentFilter filters,
@@ -42,8 +41,6 @@ public class ShipmentGraphQLController {
             @Argument Long id,
             @Argument ShipmentUpdateInput input
     ) {
-        return mapper.toModel(
-                service.update(id, input)
-        );
+        return service.update(id, input);
     }
 }

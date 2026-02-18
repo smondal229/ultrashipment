@@ -14,6 +14,26 @@ type Shipment {
     lengthCm: Float
     widthCm: Float
     heightCm: Float
+    paymentMeta: PaymentMeta
+    currentLocation: String
+
+    tracking: [ShipmentTracking!]
+}
+
+type ShipmentTracking {
+    id: ID!
+    location: String
+    status: String
+    description: String
+    eventTime: String
+}
+
+type PaymentMeta {
+    transactionId: String
+    provider: String
+    currency: String
+    paymentMethod: String
+    gatewayResponseCode: String
 }
 
 enum CarrierName {
@@ -21,6 +41,7 @@ enum CarrierName {
     DHL
     UPS
     BLUEDART
+    DELHIVERY
 }
 
 type PageInfo {
@@ -37,6 +58,7 @@ enum ShipmentStatus {
     CREATED
     PICKED_UP
     IN_TRANSIT
+    OUT_FOR_DELIVERY
     DELIVERED
     CANCELLED
 }
@@ -70,8 +92,7 @@ input ShipmentCreateInput {
 input ShipmentUpdateInput {
     shipperName: String
     carrierName: String
-    pickupLocation: String
-    deliveryLocation: String
+    currentLocation: String!
     trackingNumber: String
     rate: Float
     status: ShipmentStatus
@@ -119,12 +140,12 @@ input ShipmentFilter {
 }
 
 type Query {
-    shipments(
+    getShipments(
         pageSize: Int!
         after: String
         filters: ShipmentFilter
         sort: ShipmentSort
     ): ShipmentOutput
 
-    shipment(id: ID!): Shipment
+    getShipmentById(id: ID!): Shipment
 }

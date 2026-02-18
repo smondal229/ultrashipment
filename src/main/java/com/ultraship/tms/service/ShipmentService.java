@@ -9,16 +9,20 @@ import com.ultraship.tms.graphql.model.*;
 import com.ultraship.tms.graphql.utils.CursorPayload;
 import com.ultraship.tms.graphql.utils.CursorUtil;
 import com.ultraship.tms.mapper.ShipmentMapper;
+import com.ultraship.tms.messaging.model.TrackingEvent;
+import com.ultraship.tms.messaging.publishers.TrackingEventPublisher;
 import com.ultraship.tms.repository.ShipmentRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +31,27 @@ public class ShipmentService {
     private static final Logger log = LoggerFactory.getLogger(ShipmentService.class);
     private final ShipmentRepository shipmentRepository;
     private final ShipmentMapper mapper;
+    private final TrackingEventPublisher trackingEventPublisher;
+
+
+    @Transactional(readOnly = true)
+    public Shipment getShipmentDetails(Long id, boolean includeTracking) {
+        try {
+
+            Supplier<ShipmentNotFoundException> notFoundExceptionSupplier = () -> new ShipmentNotFoundException(id);
+
+            ShipmentEntity entity = includeTracking
+                ? shipmentRepository.findByIdWithTracking(id)
+                    .orElseThrow(notFoundExceptionSupplier)
+                : shipmentRepository.findById(id)
+                    .orElseThrow(notFoundExceptionSupplier);
+
+            return mapper.toModel(entity, includeTracking);
+        } catch (Exception error) {
+            log.error("Error fetching shipment details for fieldValue {}: ", id, error);
+            throw error;
+        }
+    }
 
     public ShipmentEntity getById(Long id) {
         return shipmentRepository.findById(id)
@@ -42,7 +67,8 @@ public class ShipmentService {
             int pageSize,
             String after,
             ShipmentSort sort
-    ) {        ShipmentSort effectiveSort = sort != null
+    ) {
+        ShipmentSort effectiveSort = sort != null
             ? sort
             : new ShipmentSort(ShipmentSort.Field.ID, ShipmentSort.Direction.ASC);
 
@@ -65,12 +91,20 @@ public class ShipmentService {
                 .map(mapper::toModel)
                 .toList();
 
-        String endCursor = shipmentEntities.isEmpty()
-                ? null
-                : CursorUtil.encode(
-                effectiveSort.field().name(),
-                shipmentEntities.get(shipmentEntities.size() - 1).getId()
-        );
+        ShipmentEntity last =
+                shipmentEntities.isEmpty() ? null :
+                        shipmentEntities.get(shipmentEntities.size() - 1);
+
+        String endCursor = null;
+
+        if (last != null) {
+            String sortValue = extractSortValue(last, effectiveSort.field());
+
+            endCursor = CursorUtil.encode(
+                    effectiveSort.field().name(),
+                    sortValue
+            );
+        }
 
         return new ShipmentOutput(
                 shipmentList,
@@ -81,9 +115,6 @@ public class ShipmentService {
         );
     }
 
-    public long countAll() {
-        return shipmentRepository.count();
-    }
 
     public Shipment create(ShipmentCreateInput input) {
         try {
@@ -94,7 +125,7 @@ public class ShipmentService {
             applyBusinessDefaults(mappedEntity);
 
             ShipmentEntity savedEntity = shipmentRepository.save(mappedEntity);
-
+            this.publishCreatedEvent(savedEntity);
             return mapper.toModel(savedEntity);
         } catch (Exception error) {
             log.error("Shipment creation error: ", error);
@@ -102,7 +133,7 @@ public class ShipmentService {
         }
     }
 
-    public ShipmentEntity update(Long id, ShipmentUpdateInput updateInput) {
+    public Shipment update(Long id, ShipmentUpdateInput updateInput) {
         try {
             ShipmentEntity existing = getById(id);
             // Validate update operations
@@ -111,9 +142,11 @@ public class ShipmentService {
             // Update fields (only if provided - partial update support)
             updateIfPresent(existing, updateInput);
 
-            return shipmentRepository.save(existing);
+            ShipmentEntity savedEntity = shipmentRepository.save(existing);
+            this.publishCreatedEvent(savedEntity);
+            return mapper.toModel(savedEntity);
         } catch (Exception error) {
-            log.error("Shipment creation error: ", error);
+            log.error("Shipment update error: ", error);
             throw error;
         }
     }
@@ -141,6 +174,14 @@ public class ShipmentService {
         // Apply default delivery type
         if (entity.getShipmentDeliveryType() == null) {
             entity.setShipmentDeliveryType(ShipmentDeliveryType.STANDARD);
+        }
+
+        if (entity.getCurrentLocation() == null) {
+            entity.setCurrentLocation(entity.getPickupLocation());
+        }
+
+        if (entity.getPickedUpAt() == null) {
+            entity.setPickedUpAt(Instant.now());
         }
     }
 
@@ -212,6 +253,7 @@ public class ShipmentService {
                 ShipmentStatus.CREATED, Set.of(ShipmentStatus.PICKED_UP, ShipmentStatus.CANCELLED),
                 ShipmentStatus.PICKED_UP, Set.of(ShipmentStatus.IN_TRANSIT, ShipmentStatus.DELIVERED, ShipmentStatus.CANCELLED),
                 ShipmentStatus.IN_TRANSIT, Set.of(ShipmentStatus.DELIVERED, ShipmentStatus.CANCELLED),
+                ShipmentStatus.OUT_FOR_DELIVERY, Set.of(ShipmentStatus.DELIVERED),
                 ShipmentStatus.DELIVERED, Set.of(), // Terminal state
                 ShipmentStatus.CANCELLED, Set.of()  // Terminal state
         );
@@ -244,12 +286,7 @@ public class ShipmentService {
         if (input.carrierName() != null) {
             existing.setCarrierName(input.carrierName());
         }
-        if (input.pickupLocation() != null) {
-            existing.setPickupLocation(input.pickupLocation());
-        }
-        if (input.deliveryLocation() != null) {
-            existing.setDeliveryLocation(input.deliveryLocation());
-        }
+
         if (input.trackingNumber() != null) {
             existing.setTrackingNumber(input.trackingNumber());
         }
@@ -291,5 +328,30 @@ public class ShipmentService {
         if (input.paymentMeta() != null) {
             existing.setPaymentMeta(input.paymentMeta());
         }
+
+        if (!input.currentLocation().isEmpty()) {
+            existing.setCurrentLocation(input.currentLocation());
+        }
+    }
+
+    private void publishCreatedEvent(ShipmentEntity s) {
+        trackingEventPublisher.publish(new TrackingEvent(
+                s.getId(),
+                s.getStatus(),
+                s.getCurrentLocation(),
+                "",
+                Instant.now(),
+                null
+        ));
+    }
+
+    private String extractSortValue(
+            ShipmentEntity entity,
+            ShipmentSort.Field field
+    ) {
+        return switch (field) {
+            case ID -> entity.getId().toString();
+            case RATE -> entity.getRate().toString();
+        };
     }
 }
