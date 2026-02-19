@@ -10,6 +10,8 @@ type Shipment {
     shipmentDeliveryType: ShipmentDeliveryType
     createdAt: String
     updatedAt: String
+    pickedUpAt: String
+    deliveredAt: String
     weightGm: Float
     lengthCm: Float
     widthCm: Float
