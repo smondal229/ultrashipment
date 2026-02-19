@@ -179,10 +179,6 @@ public class ShipmentService {
         if (entity.getCurrentLocation() == null) {
             entity.setCurrentLocation(entity.getPickupLocation());
         }
-
-        if (entity.getPickedUpAt() == null) {
-            entity.setPickedUpAt(Instant.now());
-        }
     }
 
     private ShipmentStatus deriveStatusFromDates(ShipmentEntity entity) {
