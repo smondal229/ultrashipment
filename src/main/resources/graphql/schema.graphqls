@@ -36,6 +36,7 @@ type PaymentMeta {
     currency: String
     paymentMethod: String
     gatewayResponseCode: String
+    status: PaymentStatus
 }
 
 enum CarrierName {
@@ -44,6 +45,12 @@ enum CarrierName {
     UPS
     BLUEDART
     DELHIVERY
+}
+
+enum PaymentStatus {
+    PENDING
+    IN_PROGRESS
+    COMPLETED
 }
 
 type PageInfo {

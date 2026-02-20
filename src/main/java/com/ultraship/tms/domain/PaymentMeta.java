@@ -5,5 +5,6 @@ public record PaymentMeta (
     String provider,
     String currency,
     String paymentMethod,
-    String gatewayResponseCode
+    String gatewayResponseCode,
+    PaymentStatus status
 ) {}

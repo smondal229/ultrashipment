@@ -1,9 +1,6 @@
 package com.ultraship.tms.service;
 
-import com.ultraship.tms.domain.PaymentMeta;
-import com.ultraship.tms.domain.ShipmentDeliveryType;
-import com.ultraship.tms.domain.ShipmentEntity;
-import com.ultraship.tms.domain.ShipmentStatus;
+import com.ultraship.tms.domain.*;
 import com.ultraship.tms.exception.InvalidShipmentStateException;
 import com.ultraship.tms.exception.ShipmentNotFoundException;
 import com.ultraship.tms.graphql.model.*;
@@ -186,7 +183,8 @@ public class ShipmentService {
                 null,
                 "USD",
                 null,
-                null
+                null,
+                PaymentStatus.PENDING
         ));
     }
 
