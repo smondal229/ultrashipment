@@ -26,6 +26,8 @@ COPY --from=build /app/build/libs/*.jar app.jar
 
 EXPOSE 8080
 ENV PORT=8080
+ENV SPRING_PROFILES_ACTIVE=production
+ENV JAVA_OPTS="-Xmx300m -Xms300m"
 
 # Run the Spring Boot app
-ENTRYPOINT ["sh", "-c", "java -jar app.jar --server.port=${PORT}"]
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar --server.port=${PORT}"]
