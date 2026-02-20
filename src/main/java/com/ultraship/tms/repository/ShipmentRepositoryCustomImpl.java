@@ -1,6 +1,7 @@
 package com.ultraship.tms.repository;
 
 import com.ultraship.tms.domain.ShipmentEntity;
+import com.ultraship.tms.graphql.model.NumberRange;
 import com.ultraship.tms.graphql.model.ShipmentFilter;
 import com.ultraship.tms.graphql.model.ShipmentSort;
 import com.ultraship.tms.graphql.utils.CursorPayload;
@@ -79,20 +80,22 @@ public class ShipmentRepositoryCustomImpl implements ShipmentRepositoryCustom {
 
             Path<BigDecimal> ratePath = root.get("rate");
 
-            if (filters.rate().min() != null) {
+            NumberRange rate = filters.rate();
+
+            if (rate != null && rate.min() != null) {
                 predicates.add(
                         cb.greaterThanOrEqualTo(
                                 ratePath,
-                                filters.rate().min()
+                                rate.min()
                         )
                 );
             }
 
-            if (filters.rate().max() != null) {
+            if (rate != null && rate.max() != null) {
                 predicates.add(
                         cb.lessThanOrEqualTo(
                                 ratePath,
-                                filters.rate().max()
+                                rate.max()
                         )
                 );
             }
@@ -130,19 +133,6 @@ public class ShipmentRepositoryCustomImpl implements ShipmentRepositoryCustom {
                 .setMaxResults(pageSize + 1)
                 .getResultList();
     }
-
-    /**
-     * Converts cursor string value to proper Java type.
-//     */
-//    private Comparable<?> convertCursorValue(
-//            String value,
-//            ShipmentSort.Field field
-//    ) {
-//        return switch (field) {
-//            case RATE -> new BigDecimal(value);
-//            case ID -> Long.valueOf(value);
-//        };
-//    }
 
     @SuppressWarnings("unchecked")
     private <T extends Comparable<? super T>> Predicate buildComparison(
