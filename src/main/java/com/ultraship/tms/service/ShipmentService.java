@@ -78,7 +78,7 @@ public class ShipmentService {
             filters,
             cursor,
             pageSize + 1,
-            sort
+            effectiveSort
         );
 
         boolean hasNextPage = fetched.size() > pageSize;
