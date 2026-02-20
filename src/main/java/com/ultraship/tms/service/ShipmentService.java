@@ -1,5 +1,6 @@
 package com.ultraship.tms.service;
 
+import com.ultraship.tms.domain.PaymentMeta;
 import com.ultraship.tms.domain.ShipmentDeliveryType;
 import com.ultraship.tms.domain.ShipmentEntity;
 import com.ultraship.tms.domain.ShipmentStatus;
@@ -179,6 +180,14 @@ public class ShipmentService {
         if (entity.getCurrentLocation() == null) {
             entity.setCurrentLocation(entity.getPickupLocation());
         }
+
+        entity.setPaymentMeta(new PaymentMeta(
+                null,
+                null,
+                "USD",
+                null,
+                null
+        ));
     }
 
     private ShipmentStatus deriveStatusFromDates(ShipmentEntity entity) {
