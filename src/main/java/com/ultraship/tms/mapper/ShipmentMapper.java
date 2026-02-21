@@ -47,6 +47,7 @@ public class ShipmentMapper {
             e.getWeightUnit(),
             e.getPaymentMeta(),
             e.getShipmentDeliveryType(),
+            e.getIsFlagged(),
             tracking
         );
     }
@@ -76,6 +77,7 @@ public class ShipmentMapper {
                 e.getWeightUnit(),
                 e.getPaymentMeta(),
                 e.getShipmentDeliveryType(),
+                e.getIsFlagged(),
                 null
         );
     }
@@ -105,6 +107,8 @@ public class ShipmentMapper {
         }
         e.setPaymentMeta(input.paymentMeta());
         e.setShipmentDeliveryType(input.shipmentDeliveryType());
+        e.setIsFlagged(input.isFlagged() != null ? input.isFlagged() : false);
+        e.setDeleted(false);
         return e;
     }
 }

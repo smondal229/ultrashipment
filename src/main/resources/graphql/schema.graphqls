@@ -115,6 +115,8 @@ input ShipmentUpdateInput {
 
     pickedUpAt: String
     deliveredAt: String
+
+    isFlagged: Boolean
 }
 
 input DimensionsInput {

@@ -29,6 +29,6 @@ public record Shipment(
         WeightUnit weightUnit,
         PaymentMeta paymentMeta,
         ShipmentDeliveryType shipmentDeliveryType,
-
+        Boolean isFlagged,
         List<ShipmentTracking> tracking
 ) {}

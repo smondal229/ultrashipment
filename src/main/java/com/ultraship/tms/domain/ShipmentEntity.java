@@ -78,6 +78,12 @@ public class ShipmentEntity {
     @Enumerated(EnumType.STRING)
     private WeightUnit weightUnit;
 
+    @Column(nullable = false, defaultValue = "false")
+    Boolean deleted = false;
+
+    @Column(nullable = false, defaultValue = "false")
+    Boolean isFlagged = false;
+
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
     private PaymentMeta paymentMeta;

@@ -34,6 +34,9 @@ public class ShipmentRepositoryCustomImpl implements ShipmentRepositoryCustom {
 
         List<Predicate> predicates = new ArrayList<>();
 
+        // always exclude deleted
+        predicates.add(cb.equal(root.get("deleted"), false));
+
         // filter
         if (filters != null) {
 

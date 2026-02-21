@@ -151,6 +151,14 @@ public class ShipmentService {
         }
     }
 
+    public boolean deleteById(Long id) {
+        int updated = shipmentRepository.softDeleteById(id);
+        if (updated == 0) {
+            throw new ShipmentNotFoundException(id);
+        }
+        return true;
+    }
+
     private void validateStatusConsistency(ShipmentCreateInput input) {
         if (input.status() == ShipmentStatus.PICKED_UP && input.pickedUpAt() == null) {
             throw new InvalidShipmentStateException(
@@ -361,6 +369,10 @@ public class ShipmentService {
 
         if (!input.currentLocation().isEmpty()) {
             existing.setCurrentLocation(input.currentLocation());
+        }
+
+        if (input.isFlagged() != null) {
+            existing.setIsFlagged(input.isFlagged());
         }
     }
 

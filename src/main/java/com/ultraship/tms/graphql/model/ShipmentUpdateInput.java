@@ -28,4 +28,6 @@ public record ShipmentUpdateInput(
 
         PaymentMeta paymentMeta,
         ShipmentDeliveryType shipmentDeliveryType
+
+        Boolean isFlagged
 ) {}

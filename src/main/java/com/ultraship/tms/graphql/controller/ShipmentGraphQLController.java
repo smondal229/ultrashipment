@@ -43,4 +43,9 @@ public class ShipmentGraphQLController {
     ) {
         return service.update(id, input);
     }
+
+    @MutationMapping
+    public Boolean deleteShipment(@Argument Long id) {
+        return service.deleteById(id);
+    }
 }
