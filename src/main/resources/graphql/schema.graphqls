@@ -12,10 +12,13 @@ type Shipment {
     updatedAt: String
     pickedUpAt: String
     deliveredAt: String
-    weightGm: Float
-    lengthCm: Float
-    widthCm: Float
-    heightCm: Float
+    itemValue: Float
+    itemWeight: Float
+    itemLength: Float
+    itemWidth: Float
+    itemHeight: Float
+    lengthUnit: String
+    weightUnit: String
     paymentMeta: PaymentMeta
     currentLocation: String
 
@@ -89,10 +92,9 @@ input ShipmentCreateInput {
     status: ShipmentStatus
     shipmentDeliveryType: ShipmentDeliveryType!
 
-    weightGm: Float
-    lengthCm: Float
-    widthCm: Float
-    heightCm: Float
+    itemValue: Float
+
+    dimensions: DimensionsInput
 
     pickedUpAt: String
     deliveredAt: String
@@ -106,12 +108,22 @@ input ShipmentUpdateInput {
     rate: Float
     status: ShipmentStatus
     shipmentDeliveryType: ShipmentDeliveryType
-    weightGm: Float
-    lengthCm: Float
-    widthCm: Float
-    heightCm: Float
+
+    itemValue: Float
+
+    dimensions: DimensionsInput
+
     pickedUpAt: String
     deliveredAt: String
+}
+
+input DimensionsInput {
+    itemWeight: Float
+    itemLength: Float
+    itemWidth: Float
+    itemHeight: Float
+    lengthUnit: String
+    weightUnit: String
 }
 
 type Mutation {

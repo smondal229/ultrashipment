@@ -12,10 +12,15 @@ ALTER TABLE shipments
 
 -- Add physical dimensions
 ALTER TABLE shipments
-    ADD COLUMN weight_gm DOUBLE PRECISION,
-    ADD COLUMN length_cm DOUBLE PRECISION,
-    ADD COLUMN width_cm DOUBLE PRECISION,
-    ADD COLUMN height_cm DOUBLE PRECISION;
+    ADD COLUMN item_weight NUMERIC(10,2),
+    ADD COLUMN item_length NUMERIC(10,2),
+    ADD COLUMN item_width NUMERIC(10,2),
+    ADD COLUMN item_height NUMERIC(10,2),
+    ADD COLUMN weight_unit VARCHAR(20),
+    ADD COLUMN dim_unit VARCHAR(20);
+
+ALTER TABLE shipments
+    ADD COLUMN item_value NUMERIC(15,2) DEFAULT 0.0;
 
 -- Add payment metadata as JSONB
 ALTER TABLE shipments

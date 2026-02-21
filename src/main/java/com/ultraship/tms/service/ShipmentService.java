@@ -117,6 +117,7 @@ public class ShipmentService {
     public Shipment create(ShipmentCreateInput input) {
         try {
             validateStatusConsistency(input);
+            validatePhysicalAttributes(input.dimensions());
 
             ShipmentEntity mappedEntity = mapper.toEntity(input);
 
@@ -136,6 +137,7 @@ public class ShipmentService {
             ShipmentEntity existing = getById(id);
             // Validate update operations
             validateUpdate(existing, updateInput);
+            validatePhysicalAttributes(updateInput.dimensions());
 
             // Update fields (only if provided - partial update support)
             updateIfPresent(existing, updateInput);
@@ -159,6 +161,26 @@ public class ShipmentService {
         if (input.status() == ShipmentStatus.DELIVERED && input.deliveredAt() == null) {
             throw new InvalidShipmentStateException(
                     "Delivery date is required when status is DELIVERED"
+            );
+        }
+    }
+
+    private void validatePhysicalAttributes(Dimensions input) {
+
+        boolean dimensionPresent =
+                input.itemLength() != null ||
+                        input.itemWidth() != null ||
+                        input.itemHeight() != null;
+
+        if (dimensionPresent && input.lengthUnit() == null) {
+            throw new IllegalArgumentException(
+                    "lengthUnit is required when any dimension is provided"
+            );
+        }
+
+        if (input.itemWeight() != null && input.weightUnit() == null) {
+            throw new IllegalArgumentException(
+                    "weightUnit is required when itemWeight is provided"
             );
         }
     }
@@ -298,17 +320,22 @@ public class ShipmentService {
         if (input.rate() != null) {
             existing.setRate(input.rate());
         }
-        if (input.weightGm() != null) {
-            existing.setWeightGm(input.weightGm());
-        }
-        if (input.lengthCm() != null) {
-            existing.setLengthCm(input.lengthCm());
-        }
-        if (input.widthCm() != null) {
-            existing.setWidthCm(input.widthCm());
-        }
-        if (input.heightCm() != null) {
-            existing.setHeightCm(input.heightCm());
+
+        if (input.dimensions() != null) {
+            Dimensions dimensions = input.dimensions();
+
+            if (dimensions.itemWeight() != null) {
+                existing.setItemWeight(dimensions.itemWeight());
+            }
+            if (dimensions.itemLength() != null) {
+                existing.setItemLength(dimensions.itemLength());
+            }
+            if (dimensions.itemWidth() != null) {
+                existing.setItemWidth(dimensions.itemWidth());
+            }
+            if (dimensions.itemHeight() != null) {
+                existing.setItemHeight(dimensions.itemHeight());
+            }
         }
 
         // Update enum fields

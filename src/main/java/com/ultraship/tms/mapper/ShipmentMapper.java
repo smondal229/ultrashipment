@@ -1,6 +1,7 @@
 package com.ultraship.tms.mapper;
 
 import com.ultraship.tms.domain.ShipmentEntity;
+import com.ultraship.tms.graphql.model.Dimensions;
 import com.ultraship.tms.graphql.model.Shipment;
 import com.ultraship.tms.graphql.model.ShipmentCreateInput;
 import com.ultraship.tms.graphql.model.ShipmentTracking;
@@ -37,10 +38,13 @@ public class ShipmentMapper {
             e.getDeliveredAt(),
             e.getCreatedAt(),
             e.getUpdatedAt(),
-            e.getWeightGm(),
-            e.getLengthCm(),
-            e.getHeightCm(),
-            e.getWidthCm(),
+            e.getItemValue(),
+            e.getItemWeight(),
+            e.getItemLength(),
+            e.getItemHeight(),
+            e.getItemWidth(),
+            e.getDimUnit(),
+            e.getWeightUnit(),
             e.getPaymentMeta(),
             e.getShipmentDeliveryType(),
             tracking
@@ -48,6 +52,7 @@ public class ShipmentMapper {
     }
 
     public Shipment toModel(ShipmentEntity e) {
+
         return new Shipment(
                 e.getId(),
                 e.getShipperName(),
@@ -62,10 +67,13 @@ public class ShipmentMapper {
                 e.getDeliveredAt(),
                 e.getCreatedAt(),
                 e.getUpdatedAt(),
-                e.getWeightGm(),
-                e.getLengthCm(),
-                e.getHeightCm(),
-                e.getWidthCm(),
+                e.getItemValue(),
+                e.getItemWeight(),
+                e.getItemLength(),
+                e.getItemHeight(),
+                e.getItemWidth(),
+                e.getDimUnit(),
+                e.getWeightUnit(),
                 e.getPaymentMeta(),
                 e.getShipmentDeliveryType(),
                 null
@@ -84,10 +92,17 @@ public class ShipmentMapper {
         e.setPickedUpAt(input.pickedUpAt());
         e.setDeliveredAt(input.deliveredAt());
         e.setStatus(input.status());
-        e.setWeightGm(input.weightGm());
-        e.setLengthCm(input.lengthCm());
-        e.setHeightCm(input.heightCm());
-        e.setWidthCm(input.widthCm());
+        e.setItemValue(input.itemValue());
+        if (input.dimensions() != null) {
+            Dimensions dimensions = input.dimensions();
+
+            e.setItemWeight(dimensions.itemWeight());
+            e.setItemLength(dimensions.itemLength());
+            e.setItemHeight(dimensions.itemHeight());
+            e.setItemWidth(dimensions.itemWidth());
+            e.setDimUnit(dimensions.lengthUnit());
+            e.setWeightUnit(dimensions.weightUnit());
+        }
         e.setPaymentMeta(input.paymentMeta());
         e.setShipmentDeliveryType(input.shipmentDeliveryType());
         return e;

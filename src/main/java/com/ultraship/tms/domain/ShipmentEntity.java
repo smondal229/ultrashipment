@@ -60,10 +60,23 @@ public class ShipmentEntity {
     @Column(nullable = false)
     private ShipmentDeliveryType shipmentDeliveryType;
 
-    private Double weightGm;
-    private Double lengthCm;
-    private Double widthCm;
-    private Double heightCm;
+    @Column(precision = 10, scale = 2)
+    private BigDecimal itemValue;
+
+    @Column(precision = 10, scale = 2)
+    private BigDecimal itemWeight;
+    @Column(precision = 10, scale = 2)
+    private BigDecimal itemLength;
+    @Column(precision = 10, scale = 2)
+    private BigDecimal itemWidth;
+    @Column(precision = 10, scale = 2)
+    private BigDecimal itemHeight;
+
+    @Enumerated(EnumType.STRING)
+    private LengthUnit dimUnit;
+
+    @Enumerated(EnumType.STRING)
+    private WeightUnit weightUnit;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")

@@ -1,9 +1,7 @@
 package com.ultraship.tms.graphql.model;
 
-import com.ultraship.tms.domain.Carrier;
-import com.ultraship.tms.domain.PaymentMeta;
-import com.ultraship.tms.domain.ShipmentDeliveryType;
-import com.ultraship.tms.domain.ShipmentStatus;
+import com.ultraship.tms.domain.*;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -28,19 +26,11 @@ public record ShipmentCreateInput(
         ShipmentStatus status,
         Instant pickedUpAt,
         Instant deliveredAt,
-        @Positive(message = "Weight must be positive")
-        Double weightGm,
-
-        @Positive(message = "Length must be positive")
-        Double lengthCm,
-
-        @Positive(message = "Width must be positive")
-        Double widthCm,
-
-        @Positive(message = "Height must be positive")
-        Double heightCm,
+        @Positive(message = "Item value must be positive")
+        BigDecimal itemValue,
+        @Valid
+        Dimensions dimensions,
         PaymentMeta paymentMeta,
-
         @NotNull(message = "Shipment delivery type is required")
         ShipmentDeliveryType shipmentDeliveryType
 ) {}

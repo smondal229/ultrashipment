@@ -1,10 +1,9 @@
 package com.ultraship.tms.graphql.model;
 
-import com.ultraship.tms.domain.Carrier;
-import com.ultraship.tms.domain.PaymentMeta;
-import com.ultraship.tms.domain.ShipmentDeliveryType;
-import com.ultraship.tms.domain.ShipmentStatus;
+import com.ultraship.tms.domain.*;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
 import java.math.BigDecimal;
@@ -21,17 +20,12 @@ public record ShipmentUpdateInput(
         ShipmentStatus status,
         Instant pickedUpAt,
         Instant deliveredAt,
-        @Positive(message = "Weight must be positive")
-        Double weightGm,
+        @Positive(message = "Item value must be positive")
+        BigDecimal itemValue,
 
-        @Positive(message = "Length must be positive")
-        Double lengthCm,
+        @Valid
+        Dimensions dimensions,
 
-        @Positive(message = "Width must be positive")
-        Double widthCm,
-
-        @Positive(message = "Height must be positive")
-        Double heightCm,
         PaymentMeta paymentMeta,
         ShipmentDeliveryType shipmentDeliveryType
 ) {}

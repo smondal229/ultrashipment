@@ -1,9 +1,6 @@
 package com.ultraship.tms.graphql.model;
 
-import com.ultraship.tms.domain.Carrier;
-import com.ultraship.tms.domain.PaymentMeta;
-import com.ultraship.tms.domain.ShipmentDeliveryType;
-import com.ultraship.tms.domain.ShipmentStatus;
+import com.ultraship.tms.domain.*;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -23,10 +20,13 @@ public record Shipment(
         Instant deliveredAt,
         Instant createdAt,
         Instant updatedAt,
-        Double weightGm,
-        Double lengthCm,
-        Double heightCm,
-        Double widthCm,
+        BigDecimal itemValue,
+        BigDecimal itemWeight,
+        BigDecimal itemLength,
+        BigDecimal itemHeight,
+        BigDecimal itemWidth,
+        LengthUnit lengthUnit,
+        WeightUnit weightUnit,
         PaymentMeta paymentMeta,
         ShipmentDeliveryType shipmentDeliveryType,
 

@@ -1,14 +1,17 @@
--- Enable faster inserts
+-- Enable UUID generation
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
 BEGIN;
 
--- Clear existing data (optional)
+-- Clear existing data
 TRUNCATE TABLE shipment_tracking RESTART IDENTITY CASCADE;
 TRUNCATE TABLE shipments RESTART IDENTITY CASCADE;
 
--- Carriers
 DO $$
+
 DECLARE
     carriers TEXT[] := ARRAY['FEDEX', 'DHL', 'DELHIVERY', 'BLUEDART', 'UPS'];
+
     cities TEXT[] := ARRAY[
         'Mumbai','Delhi','Bangalore','Kolkata','Chennai',
         'Hyderabad','Pune','Ahmedabad','Lucknow','Jaipur',
@@ -20,9 +23,13 @@ DECLARE
         'PICKED_UP',
         'IN_TRANSIT',
         'OUT_FOR_DELIVERY',
-        'DELIVERED',
-        'CANCELLED'
+        'DELIVERED'
     ];
+
+    providers TEXT[] := ARRAY['RAZORPAY','STRIPE','PAYU','CASHFREE'];
+    currencies TEXT[] := ARRAY['INR','USD'];
+    payment_methods TEXT[] := ARRAY['CARD','UPI','NETBANKING','WALLET'];
+    gateway_codes TEXT[] := ARRAY['00','01','02','05'];
 
     shipment_id BIGINT;
     carrier TEXT;
@@ -32,6 +39,10 @@ DECLARE
     created_time TIMESTAMP;
     event_time TIMESTAMP;
     num_events INT;
+    final_status TEXT;
+
+    payment_json JSONB;
+
     i INT;
     j INT;
 
@@ -44,8 +55,24 @@ FOR i IN 1..100 LOOP
     destination := cities[1 + floor(random()*array_length(cities,1))];
 
     tracking_no := 'TRK' || lpad(i::text, 6, '0');
-
     created_time := NOW() - (random() * interval '30 days');
+
+    num_events := 3 + floor(random()*3); -- 3 to 5 events
+    final_status := statuses[num_events];
+
+    -- Build payment JSON matching PaymentMeta record
+    payment_json := jsonb_build_object(
+        'transactionId', gen_random_uuid(),
+        'provider', providers[1 + floor(random()*array_length(providers,1))],
+        'currency', currencies[1 + floor(random()*array_length(currencies,1))],
+        'paymentMethod', payment_methods[1 + floor(random()*array_length(payment_methods,1))],
+        'gatewayResponseCode', gateway_codes[1 + floor(random()*array_length(gateway_codes,1))],
+        'status',
+            CASE
+                WHEN final_status = 'DELIVERED' THEN 'SUCCESS'
+                ELSE 'PENDING'
+            END
+    );
 
     INSERT INTO shipments(
         shipper_name,
@@ -56,13 +83,17 @@ FOR i IN 1..100 LOOP
         status,
         rate,
         shipment_delivery_type,
-        weight_gm,
-        length_cm,
-        width_cm,
-        height_cm,
+        item_weight,
+        item_length,
+        item_width,
+        item_height,
+        weight_unit,
+        dim_unit,
+        item_value,
         created_at,
         updated_at,
-        current_location
+        current_location,
+        payment_meta
     )
     VALUES (
         'Suvo Exporters ' || i,
@@ -70,21 +101,22 @@ FOR i IN 1..100 LOOP
         origin,
         destination,
         tracking_no,
-        'CREATED',
-        (random()*50000 + 500)::numeric,
+        final_status,
+        ROUND((random()*50000 + 500)::numeric, 2),
         CASE WHEN random() > 0.5 THEN 'EXPRESS' ELSE 'STANDARD' END,
-        random()*5000,
-        random()*100,
-        random()*100,
-        random()*100,
+        ROUND((random()*5000)::numeric, 2),
+        ROUND((random()*100)::numeric, 2),
+        ROUND((random()*100)::numeric, 2),
+        ROUND((random()*100)::numeric, 2),
+        'GM',
+        'CM',
+        ROUND((random()*20000 + 1000)::numeric, 2),
         created_time,
         created_time,
-        origin
+        origin,
+        payment_json
     )
     RETURNING id INTO shipment_id;
-
-    -- tracking events count
-    num_events := 3 + floor(random()*5);
 
     event_time := created_time;
 
@@ -101,7 +133,7 @@ FOR i IN 1..100 LOOP
         )
         VALUES(
             shipment_id,
-            statuses[LEAST(j, array_length(statuses,1))],
+            statuses[j],
             cities[1 + floor(random()*array_length(cities,1))],
             event_time,
             gen_random_uuid()
@@ -109,11 +141,10 @@ FOR i IN 1..100 LOOP
 
     END LOOP;
 
-    -- Update shipment with latest status
+    -- Update final shipment state
     UPDATE shipments
     SET
-        status = statuses[LEAST(num_events, array_length(statuses,1))],
-        current_location = cities[1 + floor(random()*array_length(cities,1))],
+        current_location = destination,
         updated_at = event_time
     WHERE id = shipment_id;
 
