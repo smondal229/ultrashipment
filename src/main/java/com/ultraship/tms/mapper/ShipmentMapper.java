@@ -107,8 +107,6 @@ public class ShipmentMapper {
         }
         e.setPaymentMeta(input.paymentMeta());
         e.setShipmentDeliveryType(input.shipmentDeliveryType());
-        e.setIsFlagged(input.isFlagged() != null ? input.isFlagged() : false);
-        e.setDeleted(false);
         return e;
     }
 }

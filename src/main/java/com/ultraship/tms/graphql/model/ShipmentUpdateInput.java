@@ -27,7 +27,7 @@ public record ShipmentUpdateInput(
         Dimensions dimensions,
 
         PaymentMeta paymentMeta,
-        ShipmentDeliveryType shipmentDeliveryType
+        ShipmentDeliveryType shipmentDeliveryType,
 
         Boolean isFlagged
 ) {}

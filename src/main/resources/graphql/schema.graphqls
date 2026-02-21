@@ -131,6 +131,7 @@ input DimensionsInput {
 type Mutation {
     createShipment(input: ShipmentCreateInput!): Shipment
     updateShipment(id: ID!, input: ShipmentUpdateInput!): Shipment
+    deleteShipmentById(id: ID!): Boolean
 }
 
 enum ShipmentSortField {

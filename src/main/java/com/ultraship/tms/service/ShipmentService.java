@@ -41,7 +41,7 @@ public class ShipmentService {
             ShipmentEntity entity = includeTracking
                 ? shipmentRepository.findByIdWithTracking(id)
                     .orElseThrow(notFoundExceptionSupplier)
-                : shipmentRepository.findById(id)
+                : shipmentRepository.findActiveById(id)
                     .orElseThrow(notFoundExceptionSupplier);
 
             return mapper.toModel(entity, includeTracking);
@@ -52,7 +52,7 @@ public class ShipmentService {
     }
 
     public ShipmentEntity getById(Long id) {
-        return shipmentRepository.findById(id)
+        return shipmentRepository.findActiveById(id)
                 .orElseThrow(() -> new ShipmentNotFoundException(id));
     }
 
@@ -137,7 +137,7 @@ public class ShipmentService {
             ShipmentEntity existing = getById(id);
             // Validate update operations
             validateUpdate(existing, updateInput);
-            validatePhysicalAttributes(updateInput.dimensions());
+            if (updateInput.dimensions() != null) validatePhysicalAttributes(updateInput.dimensions());
 
             // Update fields (only if provided - partial update support)
             updateIfPresent(existing, updateInput);

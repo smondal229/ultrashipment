@@ -78,10 +78,10 @@ public class ShipmentEntity {
     @Enumerated(EnumType.STRING)
     private WeightUnit weightUnit;
 
-    @Column(nullable = false, defaultValue = "false")
+    @Column(nullable = false)
     Boolean deleted = false;
 
-    @Column(nullable = false, defaultValue = "false")
+    @Column(nullable = false)
     Boolean isFlagged = false;
 
     @JdbcTypeCode(SqlTypes.JSON)
