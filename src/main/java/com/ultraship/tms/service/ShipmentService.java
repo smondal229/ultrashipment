@@ -382,6 +382,11 @@ public class ShipmentService {
         return switch (field) {
             case ID -> entity.getId().toString();
             case RATE -> entity.getRate().toString();
+            case STATUS -> entity.getStatus().name();
+            case CARRIER -> entity.getCarrierName().name();
+            case SHIPPER -> entity.getShipperName();
+            case ITEM_VALUE -> entity.getItemValue().toString();
+            case UPDATED_AT -> entity.getUpdatedAt().toString();
         };
     }
 }

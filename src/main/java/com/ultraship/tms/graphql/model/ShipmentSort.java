@@ -6,7 +6,12 @@ public class ShipmentSort {
 
     public enum Field {
         RATE("rate"),
-        ID("id");
+        CARRIER("carrierName"),
+        SHIPPER("shipperName"),
+        ID("id"),
+        UPDATED_AT("updatedAt"),
+        STATUS("status"),
+        ITEM_VALUE("itemValue");
 
         private final String dbField;
 

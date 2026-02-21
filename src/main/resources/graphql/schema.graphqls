@@ -134,6 +134,11 @@ type Mutation {
 enum ShipmentSortField {
     ID
     RATE
+    CARRIER
+    SHIPPER
+    UPDATED_AT
+    STATUS
+    ITEM_VALUE
 }
 
 enum SortDirection {
