@@ -100,10 +100,10 @@ type Address {
 }
 
 input ShipmentCreateInput {
+    shipperName: String!
+    carrierName: String!
     pickupAddress: AddressInput!
     deliveryAddress: AddressInput!
-    pickupLocation: String!
-    deliveryLocation: String!
     trackingNumber: String
     rate: Float
 
