@@ -1,10 +1,8 @@
 package com.ultraship.tms.mapper;
 
+import com.ultraship.tms.domain.Address;
 import com.ultraship.tms.domain.ShipmentEntity;
-import com.ultraship.tms.graphql.model.Dimensions;
-import com.ultraship.tms.graphql.model.Shipment;
-import com.ultraship.tms.graphql.model.ShipmentCreateInput;
-import com.ultraship.tms.graphql.model.ShipmentTracking;
+import com.ultraship.tms.graphql.model.*;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -28,8 +26,8 @@ public class ShipmentMapper {
             e.getId(),
             e.getShipperName(),
             e.getCarrierName(),
-            e.getPickupLocation(),
-            e.getDeliveryLocation(),
+            this.toAddressInput(e.getPickupAddress()),
+            this.toAddressInput(e.getDeliveryAddress()),
             e.getCurrentLocation(),
             e.getTrackingNumber(),
             e.getRate(),
@@ -53,13 +51,12 @@ public class ShipmentMapper {
     }
 
     public Shipment toModel(ShipmentEntity e) {
-
         return new Shipment(
                 e.getId(),
                 e.getShipperName(),
                 e.getCarrierName(),
-                e.getPickupLocation(),
-                e.getDeliveryLocation(),
+                this.toAddressInput(e.getPickupAddress()),
+                this.toAddressInput(e.getDeliveryAddress()),
                 e.getCurrentLocation(),
                 e.getTrackingNumber(),
                 e.getRate(),
@@ -86,8 +83,8 @@ public class ShipmentMapper {
         ShipmentEntity e = new ShipmentEntity();
         e.setShipperName(input.shipperName());
         e.setCarrierName(input.carrierName());
-        e.setPickupLocation(input.pickupLocation());
-        e.setDeliveryLocation(input.deliveryLocation());
+        e.setPickupAddress(this.toAddressEntity(input.pickupAddress()));
+        e.setDeliveryAddress(this.toAddressEntity(input.deliveryAddress()));
         e.setCurrentLocation(input.currentLocation());
         e.setTrackingNumber(input.trackingNumber());
         e.setRate(input.rate());
@@ -108,5 +105,27 @@ public class ShipmentMapper {
         e.setPaymentMeta(input.paymentMeta());
         e.setShipmentDeliveryType(input.shipmentDeliveryType());
         return e;
+    }
+
+    private AddressInput toAddressInput(Address addr) {
+        return new AddressInput(
+                addr.getCity(),
+                addr.getPostalCode(),
+                addr.getState(),
+                addr.getCountry(),
+                addr.getStreet(),
+                addr.getContactNumber()
+        );
+    }
+
+    private Address toAddressEntity(AddressInput addressInput) {
+        return new Address(
+                addressInput.getCity(),
+                addressInput.getPostalCode(),
+                addressInput.getState(),
+                addressInput.getCountry(),
+                addressInput.getStreet(),
+                addressInput.getContactNumber()
+        );
     }
 }

@@ -3,82 +3,45 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 BEGIN;
 
--- Clear existing data
 TRUNCATE TABLE shipment_tracking RESTART IDENTITY CASCADE;
 TRUNCATE TABLE shipments RESTART IDENTITY CASCADE;
 
-DO $$
+WITH constants AS (
+    SELECT
+        ARRAY['FEDEX','DHL','DELHIVERY','BLUEDART','UPS'] AS carriers,
+        ARRAY[
+            'Mumbai','Delhi','Bangalore','Kolkata','Chennai',
+            'Hyderabad','Pune','Ahmedabad','Lucknow','Jaipur',
+            'Surat','Kanpur','Nagpur','Indore','Bhopal'
+        ] AS cities,
+        ARRAY[
+            '400001','110001','560001','700001','600001',
+            '500001','411001','380001','226001','302001',
+            '395003','208001','440001','452001','462001'
+        ] AS postal_codes,
+        ARRAY['RAZORPAY','STRIPE','PAYU','CASHFREE'] AS providers,
+        ARRAY['INR','USD'] AS currencies,
+        ARRAY['CARD','UPI','NETBANKING','WALLET'] AS payment_methods,
+        ARRAY['00','01','02','05'] AS gateway_codes
+),
 
-DECLARE
-    carriers TEXT[] := ARRAY['FEDEX', 'DHL', 'DELHIVERY', 'BLUEDART', 'UPS'];
+inserted_shipments AS (
 
-    cities TEXT[] := ARRAY[
-        'Mumbai','Delhi','Bangalore','Kolkata','Chennai',
-        'Hyderabad','Pune','Ahmedabad','Lucknow','Jaipur',
-        'Surat','Kanpur','Nagpur','Indore','Bhopal'
-    ];
-
-    statuses TEXT[] := ARRAY[
-        'CREATED',
-        'PICKED_UP',
-        'IN_TRANSIT',
-        'OUT_FOR_DELIVERY',
-        'DELIVERED'
-    ];
-
-    providers TEXT[] := ARRAY['RAZORPAY','STRIPE','PAYU','CASHFREE'];
-    currencies TEXT[] := ARRAY['INR','USD'];
-    payment_methods TEXT[] := ARRAY['CARD','UPI','NETBANKING','WALLET'];
-    gateway_codes TEXT[] := ARRAY['00','01','02','05'];
-
-    shipment_id BIGINT;
-    carrier TEXT;
-    origin TEXT;
-    destination TEXT;
-    tracking_no TEXT;
-    created_time TIMESTAMP;
-    event_time TIMESTAMP;
-    num_events INT;
-    final_status TEXT;
-
-    payment_json JSONB;
-
-    i INT;
-    j INT;
-
-BEGIN
-
-FOR i IN 1..100 LOOP
-
-    carrier := carriers[1 + floor(random()*array_length(carriers,1))];
-    origin := cities[1 + floor(random()*array_length(cities,1))];
-    destination := cities[1 + floor(random()*array_length(cities,1))];
-
-    tracking_no := 'TRK' || lpad(i::text, 6, '0');
-    created_time := NOW() - (random() * interval '30 days');
-
-    num_events := 3 + floor(random()*3); -- 3 to 5 events
-    final_status := statuses[num_events];
-
-    -- Build payment JSON matching PaymentMeta record
-    payment_json := jsonb_build_object(
-        'transactionId', gen_random_uuid(),
-        'provider', providers[1 + floor(random()*array_length(providers,1))],
-        'currency', currencies[1 + floor(random()*array_length(currencies,1))],
-        'paymentMethod', payment_methods[1 + floor(random()*array_length(payment_methods,1))],
-        'gatewayResponseCode', gateway_codes[1 + floor(random()*array_length(gateway_codes,1))],
-        'status',
-            CASE
-                WHEN final_status = 'DELIVERED' THEN 'SUCCESS'
-                ELSE 'PENDING'
-            END
-    );
-
-    INSERT INTO shipments(
+    INSERT INTO shipments (
         shipper_name,
         carrier_name,
-        pickup_location,
-        delivery_location,
+        pickup_city,
+        pickup_postal_code,
+        pickup_state,
+        pickup_country,
+        pickup_street,
+        pickup_contact_number,
+        delivery_city,
+        delivery_postal_code,
+        delivery_state,
+        delivery_country,
+        delivery_street,
+        delivery_contact_number,
         tracking_number,
         status,
         rate,
@@ -95,13 +58,29 @@ FOR i IN 1..100 LOOP
         current_location,
         payment_meta
     )
-    VALUES (
-        'Suvo Exporters ' || i,
-        carrier,
-        origin,
-        destination,
-        tracking_no,
-        final_status,
+
+    SELECT
+        'Suvo Exporters ' || gs,
+        constants.carriers[1 + floor(random()*array_length(constants.carriers,1))],
+
+        addr.pickup_city,
+        addr.pickup_postal,
+        'State ' || addr.pickup_city,
+        'India',
+        'Street ' || gs,
+        '90000' || lpad(gs::text, 5, '0'),
+
+        addr.delivery_city,
+        addr.delivery_postal,
+        'State ' || addr.delivery_city,
+        'India',
+        'Street ' || (gs+100),
+        '80000' || lpad(gs::text, 5, '0'),
+
+        'TRK' || lpad(gs::text, 6, '0'),
+
+        'CREATED',
+
         ROUND((random()*50000 + 500)::numeric, 2),
         CASE WHEN random() > 0.5 THEN 'EXPRESS' ELSE 'STANDARD' END,
         ROUND((random()*5000)::numeric, 2),
@@ -111,45 +90,55 @@ FOR i IN 1..100 LOOP
         'GM',
         'CM',
         ROUND((random()*20000 + 1000)::numeric, 2),
-        created_time,
-        created_time,
-        origin,
-        payment_json
-    )
-    RETURNING id INTO shipment_id;
 
-    event_time := created_time;
+        NOW() - (random() * interval '30 days'),
+        NOW(),
+        addr.pickup_city,
 
-    FOR j IN 1..num_events LOOP
-
-        event_time := event_time + interval '4 hours' + random()*interval '6 hours';
-
-        INSERT INTO shipment_tracking(
-            shipment_id,
-            status,
-            location,
-            event_time,
-            event_id
+        jsonb_build_object(
+            'transactionId', gen_random_uuid(),
+            'provider', constants.providers[1 + floor(random()*array_length(constants.providers,1))],
+            'currency', constants.currencies[1 + floor(random()*array_length(constants.currencies,1))],
+            'paymentMethod', constants.payment_methods[1 + floor(random()*array_length(constants.payment_methods,1))],
+            'gatewayResponseCode', constants.gateway_codes[1 + floor(random()*array_length(constants.gateway_codes,1))],
+            'status', 'PENDING'
         )
-        VALUES(
-            shipment_id,
-            statuses[j],
-            cities[1 + floor(random()*array_length(cities,1))],
-            event_time,
-            gen_random_uuid()
-        );
 
-    END LOOP;
+    FROM generate_series(1, 1000) gs
+    CROSS JOIN constants
+    CROSS JOIN LATERAL (
+        SELECT
+            constants.cities[1 + floor(random()*array_length(constants.cities,1))] AS pickup_city,
+            constants.cities[1 + floor(random()*array_length(constants.cities,1))] AS delivery_city,
+            constants.postal_codes[1 + floor(random()*array_length(constants.postal_codes,1))] AS pickup_postal,
+            constants.postal_codes[1 + floor(random()*array_length(constants.postal_codes,1))] AS delivery_postal
+    ) addr
 
-    -- Update final shipment state
-    UPDATE shipments
-    SET
-        current_location = destination,
-        updated_at = event_time
-    WHERE id = shipment_id;
+    RETURNING id, pickup_city, delivery_city, created_at
+)
 
-END LOOP;
-
-END $$;
+-- Insert tracking events (3 per shipment)
+INSERT INTO shipment_tracking (
+    shipment_id,
+    status,
+    location_city,
+    location_type,
+    description,
+    event_time
+)
+SELECT
+    s.id,
+    status_seq.status,
+    status_seq.location_city,
+    status_seq.location_type,
+    status_seq.description,
+    s.created_at + status_seq.offset
+FROM inserted_shipments s
+CROSS JOIN LATERAL (
+    VALUES
+        ('CREATED', s.pickup_city, 'PICKUP_ADDRESS', 'Shipment created', interval '0 hours'),
+        ('IN_TRANSIT', 'Nagpur', 'HUB', 'Arrived at sorting hub', interval '12 hours'),
+        ('DELIVERED', s.delivery_city, 'DELIVERY_ADDRESS', 'Shipment delivered', interval '48 hours')
+) AS status_seq(status, location_city, location_type, description, offset);
 
 COMMIT;

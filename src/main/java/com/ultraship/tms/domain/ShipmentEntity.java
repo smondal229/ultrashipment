@@ -32,10 +32,28 @@ public class ShipmentEntity {
     @Column(nullable = false)
     private Carrier carrierName;
 
-    @Column(nullable = false)
-    private String pickupLocation;
-    @Column(nullable = false)
-    private String deliveryLocation;
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "city", column = @Column(name = "pickup_city")),
+            @AttributeOverride(name = "postalCode", column = @Column(name = "pickup_postal_code")),
+            @AttributeOverride(name = "state", column = @Column(name = "pickup_state")),
+            @AttributeOverride(name = "country", column = @Column(name = "pickup_country")),
+            @AttributeOverride(name = "street", column = @Column(name = "pickup_street")),
+            @AttributeOverride(name = "contactNumber", column = @Column(name = "pickup_contact_number"))
+    })
+    private Address pickupAddress;
+
+
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "city", column = @Column(name = "delivery_city")),
+            @AttributeOverride(name = "postalCode", column = @Column(name = "delivery_postal_code")),
+            @AttributeOverride(name = "state", column = @Column(name = "delivery_state")),
+            @AttributeOverride(name = "country", column = @Column(name = "delivery_country")),
+            @AttributeOverride(name = "street", column = @Column(name = "delivery_street")),
+            @AttributeOverride(name = "contactNumber", column = @Column(name = "delivery_contact_number"))
+    })
+    private Address deliveryAddress;
 
     private String currentLocation;
 

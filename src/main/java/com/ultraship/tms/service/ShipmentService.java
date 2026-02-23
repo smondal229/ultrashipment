@@ -122,7 +122,7 @@ public class ShipmentService {
             ShipmentEntity mappedEntity = mapper.toEntity(input);
 
             applyBusinessDefaults(mappedEntity);
-
+            mappedEntity.setTrackingNumber(new DefaultTrackingNumberGenerator().generate(input.carrierName()));
             ShipmentEntity savedEntity = shipmentRepository.save(mappedEntity);
             this.publishCreatedEvent(savedEntity);
             return mapper.toModel(savedEntity);
@@ -205,7 +205,7 @@ public class ShipmentService {
         }
 
         if (entity.getCurrentLocation() == null) {
-            entity.setCurrentLocation(entity.getPickupLocation());
+            entity.setCurrentLocation(entity.getPickupAddress().getCity());
         }
 
         entity.setPaymentMeta(new PaymentMeta(
@@ -273,6 +273,12 @@ public class ShipmentService {
                 );
             }
         }
+
+        if (existing.getTrackingNumber() != null && input.trackingNumber() != null) {
+            throw new InvalidShipmentStateException(
+                    "Tracking number cannot be updated once set"
+            );
+        }
     }
 
     private void validateStatusTransition(
@@ -320,7 +326,7 @@ public class ShipmentService {
             existing.setCarrierName(input.carrierName());
         }
 
-        if (input.trackingNumber() != null) {
+        if (existing.getTrackingNumber() == null && input.trackingNumber() != null) {
             existing.setTrackingNumber(input.trackingNumber());
         }
 

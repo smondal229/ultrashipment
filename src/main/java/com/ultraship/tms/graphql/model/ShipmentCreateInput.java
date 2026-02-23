@@ -1,6 +1,9 @@
 package com.ultraship.tms.graphql.model;
 
-import com.ultraship.tms.domain.*;
+import com.ultraship.tms.domain.Carrier;
+import com.ultraship.tms.domain.PaymentMeta;
+import com.ultraship.tms.domain.ShipmentDeliveryType;
+import com.ultraship.tms.domain.ShipmentStatus;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -14,10 +17,13 @@ public record ShipmentCreateInput(
         String shipperName,
         @NotNull(message = "Carrier name is required")
         Carrier carrierName,
-        @NotBlank(message = "Pickup location is required")
-        String pickupLocation,
-        @NotBlank(message = "Delivery location is required")
-        String deliveryLocation,
+        @NotNull(message = "Pickup address is required")
+        @Valid
+        AddressInput pickupAddress,
+
+        @NotNull(message = "Delivery address is required")
+        @Valid
+        AddressInput deliveryAddress,
         String currentLocation,
         String trackingNumber,
         @Positive(message = "Rate must be positive")

@@ -2,8 +2,8 @@ type Shipment {
     id: ID!
     shipperName: String!
     carrierName: CarrierName!
-    pickupLocation: String
-    deliveryLocation: String
+    pickupAddress: Address!
+    deliveryAddress: Address!
     trackingNumber: String
     rate: Float
     status: ShipmentStatus
@@ -81,9 +81,27 @@ enum ShipmentDeliveryType {
     SAME_DAY
 }
 
+input AddressInput {
+    city: String!
+    postalCode: String!
+    state: String!
+    country: String!
+    street: String
+    contactNumber: String
+}
+
+type Address {
+    city: String!
+    postalCode: String!
+    state: String!
+    country: String!
+    street: String
+    contactNumber: String
+}
+
 input ShipmentCreateInput {
-    shipperName: String!
-    carrierName: String!
+    pickupAddress: AddressInput!
+    deliveryAddress: AddressInput!
     pickupLocation: String!
     deliveryLocation: String!
     trackingNumber: String
