@@ -121,8 +121,7 @@ inserted_shipments AS (
 INSERT INTO shipment_tracking (
     shipment_id,
     status,
-    location_city,
-    location_type,
+    location,
     description,
     event_time
 )
@@ -130,15 +129,14 @@ SELECT
     s.id,
     status_seq.status,
     status_seq.location_city,
-    status_seq.location_type,
     status_seq.description,
-    s.created_at + status_seq.offset
+    s.created_at + status_seq.time_offset
 FROM inserted_shipments s
 CROSS JOIN LATERAL (
     VALUES
         ('CREATED', s.pickup_city, 'PICKUP_ADDRESS', 'Shipment created', interval '0 hours'),
         ('IN_TRANSIT', 'Nagpur', 'HUB', 'Arrived at sorting hub', interval '12 hours'),
         ('DELIVERED', s.delivery_city, 'DELIVERY_ADDRESS', 'Shipment delivered', interval '48 hours')
-) AS status_seq(status, location_city, location_type, description, offset);
+) AS status_seq(status, location_city, location_type, description, time_offset);
 
 COMMIT;
