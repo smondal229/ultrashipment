@@ -19,6 +19,6 @@ public class DefaultTrackingNumberGenerator implements TrackingNumberGenerator {
 
         String number = String.format("%09d%d", timestampPart, randomDigit);
 
-        return carrierCode + "-" + number;
+        return carrierCode + number;
     }
 }
