@@ -139,8 +139,20 @@ public class GraphQLErrorHandler extends DataFetcherExceptionResolverAdapter {
 
         String[] parts = propertyPath.split("\\.");
 
-        return parts.length > 0
-                ? parts[parts.length - 1]
-                : propertyPath;
+        // Find "input" and return everything after it
+        for (int i = 0; i < parts.length; i++) {
+            if ("input".equals(parts[i]) && i + 1 < parts.length) {
+                return String.join(".",
+                        java.util.Arrays.copyOfRange(parts, i + 1, parts.length));
+            }
+        }
+
+        // Fallback: remove only the first segment (method name)
+        if (parts.length > 1) {
+            return String.join(".",
+                    java.util.Arrays.copyOfRange(parts, 1, parts.length));
+        }
+
+        return propertyPath;
     }
 }
