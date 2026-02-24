@@ -24,6 +24,6 @@ public class AddressInput {
         String country;
         String street;
 
-        @Pattern(regexp = "\\d{10}", message = "Invalid contact number")
+        @Pattern(regexp = "^\\+?\\d{10,15}$", message = "Invalid contact number")
         String contactNumber;
 }
