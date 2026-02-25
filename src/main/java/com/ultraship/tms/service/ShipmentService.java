@@ -248,6 +248,15 @@ public class ShipmentService {
                 isChanged(input.dimensions().weightUnit(), existing.getWeightUnit());
     }
 
+    private boolean isAddressChanged(AddressInput addressInput, Address existingAddress) {
+        if (addressInput == null) {
+            return false;
+        }
+
+        Address newAddress = mapper.toAddressEntity(addressInput);
+        return newAddress.equals(existingAddress);
+    }
+
     private void validateUpdate(ShipmentEntity existing, ShipmentUpdateInput input) {
         // 1. Prevent updating immutable fields based on status
         if (existing.getStatus() == ShipmentStatus.DELIVERED) {
@@ -260,8 +269,8 @@ public class ShipmentService {
         if (existing.getStatus() != ShipmentStatus.CREATED) {
             if (isChanged(input.shipperName(), existing.getShipperName()) ||
                     isChanged(input.carrierName(), existing.getCarrierName()) ||
-                    isChanged(input.pickupAddress(), existing.getPickupAddress()) ||
-                    isChanged(input.deliveryAddress(), existing.getDeliveryAddress()) ||
+                    isAddressChanged(input.pickupAddress(), existing.getPickupAddress()) ||
+                    isAddressChanged(input.deliveryAddress(), existing.getDeliveryAddress()) ||
                     isDimensionsChanged(input, existing) ||
                     isChanged(input.itemValue(), existing.getItemValue()) ||
                     isChanged(input.rate(), existing.getRate())) {
@@ -420,12 +429,19 @@ public class ShipmentService {
             existing.setIsFlagged(input.isFlagged());
         }
 
-        if (isChanged(input.pickupAddress(), existing.getPickupAddress())) {
-            existing.setPickupAddress(existing.getPickupAddress());
+
+        if (input.pickupAddress() != null) {
+            Address newPickupAddress = mapper.toAddressEntity(input.pickupAddress());
+            if (!existing.getPickupAddress().equals(newPickupAddress)) {
+                existing.setPickupAddress(newPickupAddress);
+            }
         }
 
-        if (isChanged(input.deliveryAddress(), existing.getDeliveryAddress())) {
-            existing.setDeliveryAddress(existing.getDeliveryAddress());
+        if (input.deliveryAddress() != null) {
+            Address newDeliveryAddress = mapper.toAddressEntity(input.deliveryAddress());
+            if (!existing.getDeliveryAddress().equals(newDeliveryAddress)) {
+                existing.setDeliveryAddress(newDeliveryAddress);
+            }
         }
     }
 

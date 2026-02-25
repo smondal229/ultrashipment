@@ -8,7 +8,7 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Getter
-@EqualsAndHashCode(exclude = "contactNumber")
+@EqualsAndHashCode
 public class Address {
 
     @Column(nullable = false)

@@ -118,7 +118,7 @@ public class ShipmentMapper {
         );
     }
 
-    private Address toAddressEntity(AddressInput addressInput) {
+    public Address toAddressEntity(AddressInput addressInput) {
         return new Address(
                 addressInput.getCity(),
                 addressInput.getPostalCode(),
