@@ -309,7 +309,7 @@ public class ShipmentService {
             }
         }
 
-        if (existing.getTrackingNumber() != null && input.trackingNumber() != null) {
+        if (existing.getTrackingNumber() != null && input.trackingNumber() != null && !input.trackingNumber().equals(existing.getTrackingNumber())) {
             throw new InvalidShipmentStateException(
                     "Tracking number cannot be updated once set"
             );
