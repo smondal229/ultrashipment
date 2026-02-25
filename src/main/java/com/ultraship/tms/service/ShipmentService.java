@@ -228,6 +228,26 @@ public class ShipmentService {
         return ShipmentStatus.CREATED;
     }
 
+    private <T> boolean isChanged(T newValue, T existingValue) {
+        if (newValue == null) {
+            return false;
+        }
+        return !newValue.equals(existingValue);
+    }
+
+    private boolean isDimensionsChanged(ShipmentUpdateInput input, ShipmentEntity existing) {
+        if (input.dimensions() == null) {
+            return false;
+        }
+
+        return isChanged(input.dimensions().itemHeight(), existing.getItemHeight()) ||
+                isChanged(input.dimensions().itemLength(), existing.getItemLength()) ||
+                isChanged(input.dimensions().itemWeight(), existing.getItemWeight()) ||
+                isChanged(input.dimensions().itemWidth(), existing.getItemWidth()) ||
+                isChanged(input.dimensions().lengthUnit(), existing.getDimUnit()) ||
+                isChanged(input.dimensions().weightUnit(), existing.getWeightUnit());
+    }
+
     private void validateUpdate(ShipmentEntity existing, ShipmentUpdateInput input) {
         // 1. Prevent updating immutable fields based on status
         if (existing.getStatus() == ShipmentStatus.DELIVERED) {
@@ -236,7 +256,22 @@ public class ShipmentService {
             );
         }
 
-        // 2. Date consistency validation
+        // 2. Block updates after created status
+        if (existing.getStatus() != ShipmentStatus.CREATED) {
+            if (isChanged(input.shipperName(), existing.getShipperName()) ||
+                    isChanged(input.carrierName(), existing.getCarrierName()) ||
+                    isChanged(input.pickupAddress(), existing.getPickupAddress()) ||
+                    isChanged(input.deliveryAddress(), existing.getDeliveryAddress()) ||
+                    isDimensionsChanged(input, existing) ||
+                    isChanged(input.itemValue(), existing.getItemValue()) ||
+                    isChanged(input.rate(), existing.getRate())) {
+                throw new InvalidShipmentStateException(
+                        "Shipment details cannot be modified after it leaves CREATED state"
+                );
+            }
+        }
+
+        // 3. Date consistency validation
         Instant newPickedUpAt = input.pickedUpAt() != null ? input.pickedUpAt() : existing.getPickedUpAt();
         Instant newDeliveredAt = input.deliveredAt() != null ? input.deliveredAt() : existing.getDeliveredAt();
 
@@ -331,8 +366,12 @@ public class ShipmentService {
         }
 
         // Update numeric fields
-        if (input.rate() != null) {
+        if (isChanged(input.rate(), existing.getRate())) {
             existing.setRate(input.rate());
+        }
+
+        if (isChanged(input.itemValue(), existing.getItemValue())) {
+            existing.setItemValue(input.itemValue());
         }
 
         if (input.dimensions() != null) {
@@ -379,6 +418,14 @@ public class ShipmentService {
 
         if (input.isFlagged() != null) {
             existing.setIsFlagged(input.isFlagged());
+        }
+
+        if (isChanged(input.pickupAddress(), existing.getPickupAddress())) {
+            existing.setPickupAddress(existing.getPickupAddress());
+        }
+
+        if (isChanged(input.deliveryAddress(), existing.getDeliveryAddress())) {
+            existing.setDeliveryAddress(existing.getDeliveryAddress());
         }
     }
 

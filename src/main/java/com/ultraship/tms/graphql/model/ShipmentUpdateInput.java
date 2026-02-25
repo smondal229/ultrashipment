@@ -24,7 +24,10 @@ public record ShipmentUpdateInput(
         Instant deliveredAt,
         @Positive(message = "Item value must be positive")
         BigDecimal itemValue,
-
+        @Valid
+        AddressInput pickupAddress,
+        @Valid
+        AddressInput deliveryAddress,
         @Valid
         Dimensions dimensions,
 

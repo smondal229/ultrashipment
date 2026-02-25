@@ -123,6 +123,8 @@ input ShipmentUpdateInput {
     carrierName: String
     currentLocation: String!
     trackingNumber: String
+    pickupAddress: AddressInput
+    deliveryAddress: AddressInput
     rate: Float
     status: ShipmentStatus
     shipmentDeliveryType: ShipmentDeliveryType
