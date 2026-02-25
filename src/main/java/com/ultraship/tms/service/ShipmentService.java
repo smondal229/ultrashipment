@@ -254,7 +254,7 @@ public class ShipmentService {
         }
 
         Address newAddress = mapper.toAddressEntity(addressInput);
-        return newAddress.equals(existingAddress);
+        return !newAddress.equals(existingAddress);
     }
 
     private void validateUpdate(ShipmentEntity existing, ShipmentUpdateInput input) {
