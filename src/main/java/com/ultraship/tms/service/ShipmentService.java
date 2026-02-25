@@ -288,7 +288,7 @@ public class ShipmentService {
         }
 
         // 3. Status transition validation
-        if (input.status() != null) {
+        if (input.status() != null && !input.status().equals(existing.getStatus())) {
             validateStatusTransition(existing.getStatus(), input.status(), newPickedUpAt, newDeliveredAt);
         }
 
