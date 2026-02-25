@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -232,6 +233,15 @@ public class ShipmentService {
         if (newValue == null) {
             return false;
         }
+
+        if (existingValue == null) {
+            return true;
+        }
+
+        if (newValue instanceof BigDecimal newBd && existingValue instanceof BigDecimal oldBd) {
+            return newBd.compareTo(oldBd) != 0;
+        }
+
         return !newValue.equals(existingValue);
     }
 
