@@ -344,11 +344,11 @@ public class ShipmentService {
         // Define valid state transitions
         Map<ShipmentStatus, Set<ShipmentStatus>> allowedTransitions = Map.of(
                 ShipmentStatus.CREATED, Set.of(ShipmentStatus.PICKED_UP, ShipmentStatus.CANCELLED),
-                ShipmentStatus.PICKED_UP, Set.of(ShipmentStatus.IN_TRANSIT, ShipmentStatus.DELIVERED, ShipmentStatus.CANCELLED),
-                ShipmentStatus.IN_TRANSIT, Set.of(ShipmentStatus.DELIVERED, ShipmentStatus.CANCELLED),
+                ShipmentStatus.PICKED_UP, Set.of(ShipmentStatus.IN_TRANSIT, ShipmentStatus.CANCELLED),
+                ShipmentStatus.IN_TRANSIT, Set.of(ShipmentStatus.OUT_FOR_DELIVERY, ShipmentStatus.CANCELLED),
                 ShipmentStatus.OUT_FOR_DELIVERY, Set.of(ShipmentStatus.DELIVERED),
-                ShipmentStatus.DELIVERED, Set.of(), // Terminal state
-                ShipmentStatus.CANCELLED, Set.of()  // Terminal state
+                ShipmentStatus.DELIVERED, Set.of(),
+                ShipmentStatus.CANCELLED, Set.of()
         );
 
         if (!allowedTransitions.get(currentStatus).contains(newStatus)) {
