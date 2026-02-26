@@ -42,6 +42,12 @@ type PaymentMeta {
     status: PaymentStatus
 }
 
+type FilterOption {
+    value: String!
+    label: String!
+    code: String!
+}
+
 enum CarrierName {
     FEDEX
     DHL
@@ -188,6 +194,12 @@ input ShipmentFilter {
     rate: FloatRange
 }
 
+type ShipmentFilterOptions {
+    carriers: [FilterOption!]!
+    statuses: [FilterOption!]!
+    shipmentDeliveryTypes: [FilterOption!]!
+}
+
 type Query {
     getShipments(
         pageSize: Int!
@@ -197,4 +209,6 @@ type Query {
     ): ShipmentOutput
 
     getShipmentById(id: ID!): Shipment
+
+    getAllFilterOptions: ShipmentFilterOptions
 }

@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -158,6 +159,26 @@ public class ShipmentService {
             throw new ShipmentNotFoundException(id);
         }
         return true;
+    }
+
+    public Map<String, List<FilterOption>> getAllFilterOptions() {
+        List<FilterOption> carrierOptions = Arrays.stream(Carrier.values())
+                .map(c -> new FilterOption(c.name(), c.getLabel()))
+                .toList();
+
+        List<FilterOption> statusOptions = Arrays.stream(ShipmentStatus.values())
+                .map(s -> new FilterOption(s.name(), s.getLabel()))
+                .toList();
+
+        List<FilterOption> deliveryTypeOptions = Arrays.stream(ShipmentDeliveryType.values())
+                .map(s -> new FilterOption(s.name(), s.getLabel()))
+                .toList();
+
+        return Map.of(
+                "carriers", carrierOptions,
+                "statuses", statusOptions,
+                "shipmentDeliveryTypes", deliveryTypeOptions
+        );
     }
 
     private void validateStatusConsistency(ShipmentCreateInput input) {

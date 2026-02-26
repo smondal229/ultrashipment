@@ -1,7 +1,17 @@
 package com.ultraship.tms.domain;
 
+import lombok.Getter;
+
+@Getter
 public enum ShipmentDeliveryType {
-    STANDARD,
-    EXPRESS,
-    SAME_DAY
+    STANDARD("Standard"),
+    EXPRESS("Express"),
+    SAME_DAY("Same Day");
+
+    ShipmentDeliveryType(String label) {
+        this.label = label;
+    }
+
+    private final String label;
+
 }

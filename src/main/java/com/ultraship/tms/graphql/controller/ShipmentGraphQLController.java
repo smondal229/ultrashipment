@@ -10,6 +10,9 @@ import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
 
+import java.util.List;
+import java.util.Map;
+
 @Controller
 @RequiredArgsConstructor
 public class ShipmentGraphQLController {
@@ -48,4 +51,10 @@ public class ShipmentGraphQLController {
     public Boolean deleteShipment(@Argument Long id) {
         return service.deleteById(id);
     }
+
+    @QueryMapping(name="getAllFilterOptions")
+    public Map<String, List<FilterOption>> getAllFilterOptions() {
+        return service.getAllFilterOptions();
+    }
+
 }
