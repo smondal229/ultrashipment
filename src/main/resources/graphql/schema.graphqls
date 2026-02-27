@@ -159,7 +159,7 @@ type Mutation {
     createShipment(input: ShipmentCreateInput!): Shipment
     updateShipment(id: ID!, input: ShipmentUpdateInput!): Shipment
     deleteShipmentById(id: ID!): Boolean
-    flagShipmentById(id: ID!, flagged: Boolean): Boolean
+    flagShipmentById(id: ID!, flagged: Boolean!): Boolean
 }
 
 enum ShipmentSortField {
