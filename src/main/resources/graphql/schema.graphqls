@@ -12,6 +12,7 @@ type Shipment {
     updatedAt: String
     pickedUpAt: String
     deliveredAt: String
+    isFlagged: Boolean
     itemValue: Float
     itemWeight: Float
     itemLength: Float
@@ -158,6 +159,7 @@ type Mutation {
     createShipment(input: ShipmentCreateInput!): Shipment
     updateShipment(id: ID!, input: ShipmentUpdateInput!): Shipment
     deleteShipmentById(id: ID!): Boolean
+    flagShipmentById(id: ID!, flagged: Boolean): Boolean
 }
 
 enum ShipmentSortField {

@@ -47,6 +47,11 @@ public class ShipmentGraphQLController {
         return service.update(id, input);
     }
 
+    @MutationMapping(name="flagShipmentById")
+    public Boolean flagShipment(@Argument Long id, @Argument Boolean flagged) {
+        return service.flagShipment(id, flagged);
+    }
+
     @MutationMapping(name="deleteShipmentById")
     public Boolean deleteShipment(@Argument Long id) {
         return service.deleteById(id);

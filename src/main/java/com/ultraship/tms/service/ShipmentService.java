@@ -153,12 +153,30 @@ public class ShipmentService {
         }
     }
 
-    public boolean deleteById(Long id) {
-        int updated = shipmentRepository.softDeleteById(id);
-        if (updated == 0) {
-            throw new ShipmentNotFoundException(id);
+    public Boolean flagShipment(Long id, boolean flagged) {
+        try {
+            int updated = shipmentRepository.flagShipmentById(id, flagged);
+            if (updated == 0) {
+                throw new ShipmentNotFoundException(id);
+            }
+            return true;
+        } catch (Exception e) {
+            log.error("Shipment flagging error: ", e);
+            throw e;
         }
-        return true;
+    }
+
+    public boolean deleteById(Long id) {
+        try {
+            int updated = shipmentRepository.softDeleteById(id);
+            if (updated == 0) {
+                throw new ShipmentNotFoundException(id);
+            }
+            return true;
+        } catch (Exception error) {
+            log.error("Shipment delete error: ", error);
+            throw error;
+        }
     }
 
     public Map<String, List<FilterOption>> getAllFilterOptions() {
@@ -290,9 +308,10 @@ public class ShipmentService {
 
     private void validateUpdate(ShipmentEntity existing, ShipmentUpdateInput input) {
         // 1. Prevent updating immutable fields based on status
-        if (existing.getStatus() == ShipmentStatus.DELIVERED) {
+        if (existing.getStatus() == ShipmentStatus.DELIVERED ||
+                existing.getStatus() == ShipmentStatus.CANCELLED) {
             throw new InvalidShipmentStateException(
-                    "Cannot update a delivered shipment"
+                    "Cannot update a shipment that is " + existing.getStatus().name().toLowerCase()
             );
         }
 

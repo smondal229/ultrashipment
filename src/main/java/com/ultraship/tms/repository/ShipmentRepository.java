@@ -30,4 +30,9 @@ public interface ShipmentRepository
         @Transactional
         @Query("UPDATE ShipmentEntity s SET s.deleted = true WHERE s.id = :id AND s.deleted = false")
         int softDeleteById(@Param("id") Long id);
+
+        @Modifying
+        @Transactional
+        @Query("UPDATE ShipmentEntity s SET s.isFlagged = :isFlagged WHERE s.id = :id AND s.deleted = false")
+        int flagShipmentById(@Param("id") Long id, @Param("isFlagged") boolean isFlagged);
 }
