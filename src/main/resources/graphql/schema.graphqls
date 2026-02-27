@@ -194,6 +194,7 @@ input ShipmentFilter {
     trackingNumber: String
     shipperName: String
     rate: FloatRange
+    isFlagged: Boolean
 }
 
 type ShipmentFilterOptions {

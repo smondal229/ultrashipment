@@ -102,6 +102,14 @@ public class ShipmentRepositoryCustomImpl implements ShipmentRepositoryCustom {
                         )
                 );
             }
+
+            Boolean isFlagged = filters.isFlagged();
+
+            if (isFlagged != null) {
+                predicates.add(
+                    cb.equal(root.get("isFlagged"), isFlagged)
+                );
+            }
         }
 
         boolean asc = sort.direction() == ShipmentSort.Direction.ASC;

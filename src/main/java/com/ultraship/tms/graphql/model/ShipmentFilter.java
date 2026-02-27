@@ -12,6 +12,6 @@ public record ShipmentFilter(
         List<ShipmentStatus> status,
         List<ShipmentDeliveryType> shipmentDeliveryType,
         String shipperName,
-        NumberRange rate
+        NumberRange rate,
+        Boolean isFlagged
 ) {}
-
