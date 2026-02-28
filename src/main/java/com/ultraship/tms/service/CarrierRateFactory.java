@@ -29,24 +29,19 @@ public class CarrierRateFactory {
     private CarrierRateCalculator buildFedex() {
 
         BaseRateCalculator base = new BaseRateCalculator(
-                new BigDecimal("55"),
-                new BigDecimal("0.89"),
+                new BigDecimal("25"),
+                new BigDecimal("20"),
                 new BigDecimal("5000")
         );
 
         List<PricingRule> rules = List.of(
-                new WeightSlabRule(new BigDecimal("15"), new BigDecimal("1.10")),
-
-                new VolumeSlabRule(new BigDecimal("28"), new BigDecimal("0.035")),
-
                 new InternationalRule(new BigDecimal("32")),
-
+                new FuelSurchargeRule(new BigDecimal("17.928")),
                 new DeliveryPercentageRule(Map.of(
                         ShipmentDeliveryType.STANDARD, BigDecimal.ZERO,
                         ShipmentDeliveryType.EXPRESS, new BigDecimal("0.12"),
                         ShipmentDeliveryType.SAME_DAY, new BigDecimal("0.28")
                 )),
-
                 new GstRule(new BigDecimal("0.18"))
         );
 
@@ -56,27 +51,19 @@ public class CarrierRateFactory {
     private CarrierRateCalculator buildDhl() {
 
         BaseRateCalculator base = new BaseRateCalculator(
-                new BigDecimal("60"),   // base fee (higher premium)
-                new BigDecimal("0.79"),   // per kg
+                new BigDecimal("25"),   // base fee (higher premium)
+                new BigDecimal("22"),   // per kg
                 new BigDecimal("5000")  // volumetric divisor
         );
 
         List<PricingRule> rules = List.of(
-
-                // Weight over 12kg → $1.25 per extra kg
-                new WeightSlabRule(new BigDecimal("12"), new BigDecimal("1.25")),
-
-                // Volume over 30 (unit depends on your rule logic)
-                new VolumeSlabRule(new BigDecimal("30"), new BigDecimal("0.04")),
-
                 new InternationalRule(new BigDecimal("350")),
-
+                new FuelSurchargeRule(new BigDecimal("14")),
                 new DeliveryPercentageRule(Map.of(
                         ShipmentDeliveryType.STANDARD, BigDecimal.ZERO,
                         ShipmentDeliveryType.EXPRESS, new BigDecimal("0.15"),
                         ShipmentDeliveryType.SAME_DAY, new BigDecimal("0.30")
                 )),
-
                 new GstRule(new BigDecimal("0.18"))
         );
 
@@ -86,27 +73,19 @@ public class CarrierRateFactory {
     private CarrierRateCalculator buildUps() {
 
         BaseRateCalculator base = new BaseRateCalculator(
-                new BigDecimal("50"),   // base fee
-                new BigDecimal("0.95"),   // per kg
+                new BigDecimal("22"),   // base fee
+                new BigDecimal("20"),   // per kg
                 new BigDecimal("5000")  // volumetric divisor
         );
 
         List<PricingRule> rules = List.of(
-
-                // Weight slab rule
-                new WeightSlabRule(new BigDecimal(10), new BigDecimal("1.15")),
-
-                // Volume slab rule
-                new VolumeSlabRule(new BigDecimal(25), new BigDecimal("0.03")),
-
                 new InternationalRule(new BigDecimal("300")),
-
+                new FuelSurchargeRule(new BigDecimal("18")),
                 new DeliveryPercentageRule(Map.of(
                         ShipmentDeliveryType.STANDARD, BigDecimal.ZERO,
                         ShipmentDeliveryType.EXPRESS, new BigDecimal("0.10"),
                         ShipmentDeliveryType.SAME_DAY, new BigDecimal("0.25")
                 )),
-
                 new GstRule(new BigDecimal("0.18"))
         );
 
@@ -116,27 +95,19 @@ public class CarrierRateFactory {
     private CarrierRateCalculator buildBlueDart() {
 
         BaseRateCalculator base = new BaseRateCalculator(
-                new BigDecimal("40"),
-                new BigDecimal("1.09"),
-                new BigDecimal("5000")
+                new BigDecimal("18"),
+                new BigDecimal("6"),
+                new BigDecimal("4000")
         );
 
         List<PricingRule> rules = List.of(
-
-                // Weight slab rule
-                new WeightSlabRule(new BigDecimal(12), new BigDecimal("1.22")),
-
-                // Volume slab rule
-                new VolumeSlabRule(new BigDecimal(28), new BigDecimal("0.034")),
-
                 new InternationalRule(new BigDecimal("250")),
-
+                new FuelSurchargeRule(new BigDecimal("15")),
                 new DeliveryPercentageRule(Map.of(
                         ShipmentDeliveryType.STANDARD, BigDecimal.ZERO,
                         ShipmentDeliveryType.EXPRESS, new BigDecimal("0.12"),
                         ShipmentDeliveryType.SAME_DAY, new BigDecimal("0.30")
                 )),
-
                 new GstRule(new BigDecimal("0.18"))
         );
 
@@ -146,27 +117,19 @@ public class CarrierRateFactory {
     private CarrierRateCalculator buildDelhivery() {
 
         BaseRateCalculator base = new BaseRateCalculator(
-                new BigDecimal("30"),
-                new BigDecimal("0.99"),
-                new BigDecimal("5000")
+                new BigDecimal("28"),
+                new BigDecimal("6"),
+                new BigDecimal("4000")
         );
 
         List<PricingRule> rules = List.of(
-
-                // Weight slab rule
-                new WeightSlabRule(new BigDecimal("10.54"), new BigDecimal("1.18")),
-
-                // Volume slab rule
-                new VolumeSlabRule(new BigDecimal("21.48"), new BigDecimal("0.0293")),
-
                 new InternationalRule(new BigDecimal("200")),
-
+                new FuelSurchargeRule(new BigDecimal("18")),
                 new DeliveryPercentageRule(Map.of(
                         ShipmentDeliveryType.STANDARD, BigDecimal.ZERO,
                         ShipmentDeliveryType.EXPRESS, new BigDecimal("0.08"),
                         ShipmentDeliveryType.SAME_DAY, new BigDecimal("0.20")
                 )),
-
                 new GstRule(new BigDecimal("0.18"))
         );
 

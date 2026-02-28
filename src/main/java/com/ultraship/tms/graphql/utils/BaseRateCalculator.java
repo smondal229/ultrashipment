@@ -28,7 +28,7 @@ public class BaseRateCalculator {
         BigDecimal h = UnitConverter.toCm(req.getItemHeight(), req.getLengthUnit());
 
         BigDecimal volumetricWeight = l.multiply(w).multiply(h)
-                .divide(VOLUMETRIC_DIVISOR, 6, RoundingMode.HALF_UP);
+                .divide(VOLUMETRIC_DIVISOR, 3, RoundingMode.HALF_UP);
 
         BigDecimal chargeableWeight = weightKg.max(volumetricWeight);
 

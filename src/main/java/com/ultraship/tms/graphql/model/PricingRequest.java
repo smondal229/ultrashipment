@@ -56,20 +56,4 @@ public class PricingRequest {
     @NotBlank(message = "Delivery country is required")
     @Size(max = 100)
     private String deliveryCountry;
-
-    public static PricingRequest from(Shipment shipment) {
-        return new PricingRequest(
-                shipment.carrierName(),
-                shipment.shipmentDeliveryType(),
-                shipment.itemLength(),
-                shipment.itemWidth(),
-                shipment.itemHeight(),
-                shipment.lengthUnit(),
-                shipment.itemWeight(),
-                shipment.weightUnit(),
-                shipment.itemValue(),
-                shipment.pickupAddress().getCountry(),
-                shipment.deliveryAddress().getCountry()
-        );
-    }
 }
