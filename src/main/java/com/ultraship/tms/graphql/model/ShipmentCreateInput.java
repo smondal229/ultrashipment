@@ -4,7 +4,6 @@ import com.ultraship.tms.domain.Carrier;
 import com.ultraship.tms.domain.PaymentMeta;
 import com.ultraship.tms.domain.ShipmentDeliveryType;
 import com.ultraship.tms.domain.ShipmentStatus;
-import com.ultraship.tms.validator.FieldGreaterThan;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -13,7 +12,6 @@ import jakarta.validation.constraints.Positive;
 import java.math.BigDecimal;
 import java.time.Instant;
 
-@FieldGreaterThan(field = "itemValue", compareTo = "rate")
 public record ShipmentCreateInput(
         @NotBlank(message = "Shipper name is required")
         String shipperName,

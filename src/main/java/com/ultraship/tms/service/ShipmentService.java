@@ -10,6 +10,8 @@ import com.ultraship.tms.mapper.ShipmentMapper;
 import com.ultraship.tms.messaging.model.TrackingEvent;
 import com.ultraship.tms.messaging.publishers.TrackingEventPublisher;
 import com.ultraship.tms.repository.ShipmentRepository;
+import com.ultraship.tms.validations.ShipmentValidationContext;
+import com.ultraship.tms.validations.ShipmentValidator;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,10 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Supplier;
 
 @Service
@@ -32,6 +31,8 @@ public class ShipmentService {
     private final ShipmentRepository shipmentRepository;
     private final ShipmentMapper mapper;
     private final TrackingEventPublisher trackingEventPublisher;
+    private final CarrierRateFactory carrierRateFactory;
+    private final ShipmentValidator shipmentValidator;
 
 
     @Transactional(readOnly = true)
@@ -118,14 +119,20 @@ public class ShipmentService {
 
     public Shipment create(ShipmentCreateInput input) {
         try {
-            validateStatusConsistency(input);
-            validatePhysicalAttributes(input.dimensions());
+            ShipmentValidationContext context =
+                    ShipmentValidationContext.forCreate(input);
 
-            ShipmentEntity mappedEntity = mapper.toEntity(input);
+            shipmentValidator.validate(context);
 
-            applyBusinessDefaults(mappedEntity);
-            mappedEntity.setTrackingNumber(new DefaultTrackingNumberGenerator().generate(input.carrierName()));
-            ShipmentEntity savedEntity = shipmentRepository.save(mappedEntity);
+            ShipmentEntity entity = mapper.toEntity(input);
+            applyBusinessDefaults(entity);
+
+            entity.setTrackingNumber(
+                    new DefaultTrackingNumberGenerator()
+                            .generate(input.carrierName())
+            );
+
+            ShipmentEntity savedEntity = shipmentRepository.save(entity);
             this.publishCreatedEvent(savedEntity);
             return mapper.toModel(savedEntity);
         } catch (Exception error) {
@@ -199,18 +206,11 @@ public class ShipmentService {
         );
     }
 
-    private void validateStatusConsistency(ShipmentCreateInput input) {
-        if (input.status() == ShipmentStatus.PICKED_UP && input.pickedUpAt() == null) {
-            throw new InvalidShipmentStateException(
-                    "Pickup date is required when status is PICKED_UP"
-            );
-        }
+    public BigDecimal calculateRate(PricingRequest request) {
+        CarrierRateCalculator calculator =
+                carrierRateFactory.get(request.getCarrierName());
 
-        if (input.status() == ShipmentStatus.DELIVERED && input.deliveredAt() == null) {
-            throw new InvalidShipmentStateException(
-                    "Delivery date is required when status is DELIVERED"
-            );
-        }
+        return calculator.calculate(request);
     }
 
     private void validatePhysicalAttributes(Dimensions input) {
@@ -368,9 +368,52 @@ public class ShipmentService {
             }
         }
 
+        validateDeliveryType(
+                input.pickupAddress(),
+                input.deliveryAddress(),
+                input.shipmentDeliveryType(),
+                existing.getPickupAddress(),
+                existing.getDeliveryAddress(),
+                existing.getShipmentDeliveryType()
+        );
+
         if (existing.getTrackingNumber() != null && input.trackingNumber() != null && !input.trackingNumber().equals(existing.getTrackingNumber())) {
             throw new InvalidShipmentStateException(
                     "Tracking number cannot be updated once set"
+            );
+        }
+    }
+
+    private void validateDeliveryType(
+            AddressInput newPickupAddress,
+            AddressInput newDeliveryAddress,
+            ShipmentDeliveryType newDeliveryType,
+            Address existingPickupAddress,
+            Address existingDeliveryAddress,
+            ShipmentDeliveryType existingDeliveryType
+    ) {
+        ShipmentDeliveryType deliveryType =
+                newDeliveryType != null
+                        ? newDeliveryType
+                        : existingDeliveryType;
+
+        String pickupCountry = resolveCountry(
+                newPickupAddress,
+                existingPickupAddress
+        );
+
+        String deliveryCountry = resolveCountry(
+                newDeliveryAddress,
+                existingDeliveryAddress
+        );
+
+        if (deliveryType == ShipmentDeliveryType.SAME_DAY &&
+                pickupCountry != null &&
+                deliveryCountry != null &&
+                !pickupCountry.equalsIgnoreCase(deliveryCountry)) {
+
+            throw new InvalidShipmentStateException(
+                    "Same day delivery is applicable only for domestic shipments"
             );
         }
     }
@@ -493,6 +536,19 @@ public class ShipmentService {
                 existing.setDeliveryAddress(newDeliveryAddress);
             }
         }
+    }
+
+    private String resolveCountry(AddressInput inputAddress, Address existingAddress) {
+
+        if (inputAddress != null && inputAddress.getCountry() != null) {
+            return inputAddress.getCountry();
+        }
+
+        if (existingAddress != null) {
+            return existingAddress.getCountry();
+        }
+
+        return null;
     }
 
     private void publishCreatedEvent(ShipmentEntity s) {

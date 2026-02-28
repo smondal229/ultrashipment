@@ -203,6 +203,26 @@ type ShipmentFilterOptions {
     shipmentDeliveryTypes: [FilterOption!]!
 }
 
+input PricingRequest {
+    carrierName: CarrierName
+    deliveryType: ShipmentDeliveryType!
+    pickupCountry: String!
+    deliveryCountry: String!
+    itemWeight: Float!
+    itemLength: Float!
+    itemWidth: Float!
+    itemHeight: Float!
+    itemValue: Float!
+    lengthUnit: String!
+    weightUnit: String!
+}
+
+type PricingResponse {
+    baseRate: Float!
+    fuelSurcharge: Float!
+    totalAmount: Float!
+}
+
 type Query {
     getShipments(
         pageSize: Int!
@@ -214,4 +234,6 @@ type Query {
     getShipmentById(id: ID!): Shipment
 
     getAllFilterOptions: ShipmentFilterOptions
+    calculateRate(pricingRequest: PricingRequest!): Float!
 }
+

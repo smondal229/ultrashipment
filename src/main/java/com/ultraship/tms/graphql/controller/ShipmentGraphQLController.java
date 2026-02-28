@@ -1,5 +1,6 @@
 package com.ultraship.tms.graphql.controller;
 
+import com.ultraship.tms.domain.Carrier;
 import com.ultraship.tms.graphql.model.*;
 import com.ultraship.tms.service.ShipmentService;
 import graphql.schema.DataFetchingFieldSelectionSet;
@@ -10,6 +11,7 @@ import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -42,7 +44,7 @@ public class ShipmentGraphQLController {
     @MutationMapping
     public Shipment updateShipment(
             @Argument Long id,
-            @Argument ShipmentUpdateInput input
+            @Valid @Argument ShipmentUpdateInput input
     ) {
         return service.update(id, input);
     }
@@ -60,6 +62,11 @@ public class ShipmentGraphQLController {
     @QueryMapping(name="getAllFilterOptions")
     public Map<String, List<FilterOption>> getAllFilterOptions() {
         return service.getAllFilterOptions();
+    }
+
+    @QueryMapping
+    public BigDecimal calculateRate(@Valid @Argument PricingRequest pricingRequest) {
+        return service.calculateRate(pricingRequest);
     }
 
 }
