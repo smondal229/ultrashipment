@@ -133,7 +133,7 @@ public class ShipmentService {
             );
 
             ShipmentEntity savedEntity = shipmentRepository.save(entity);
-            this.publishCreatedEvent(savedEntity);
+            this.publishTrackingEvent(savedEntity);
             return mapper.toModel(savedEntity);
         } catch (Exception error) {
             log.error("Shipment creation error: ", error);
@@ -141,23 +141,21 @@ public class ShipmentService {
         }
     }
 
-    public Shipment update(Long id, ShipmentUpdateInput updateInput) {
-        try {
-            ShipmentEntity existing = getById(id);
-            // Validate update operations
-            validateUpdate(existing, updateInput);
-            if (updateInput.dimensions() != null) validatePhysicalAttributes(updateInput.dimensions());
+    public Shipment update(Long id, ShipmentUpdateInput input) {
 
-            // Update fields (only if provided - partial update support)
-            updateIfPresent(existing, updateInput);
+        ShipmentEntity existing = getById(id);
 
-            ShipmentEntity savedEntity = shipmentRepository.save(existing);
-            this.publishCreatedEvent(savedEntity);
-            return mapper.toModel(savedEntity);
-        } catch (Exception error) {
-            log.error("Shipment update error: ", error);
-            throw error;
-        }
+        ShipmentValidationContext context =
+                ShipmentValidationContext.forUpdate(existing, input);
+
+        shipmentValidator.validate(context);
+
+        updateIfPresent(existing, input);
+
+        ShipmentEntity saved = shipmentRepository.save(existing);
+        this.publishTrackingEvent(saved);
+
+        return mapper.toModel(saved);
     }
 
     public Boolean flagShipment(Long id, boolean flagged) {
@@ -213,26 +211,6 @@ public class ShipmentService {
         return calculator.calculate(request);
     }
 
-    private void validatePhysicalAttributes(Dimensions input) {
-
-        boolean dimensionPresent =
-                input.itemLength() != null ||
-                        input.itemWidth() != null ||
-                        input.itemHeight() != null;
-
-        if (dimensionPresent && input.lengthUnit() == null) {
-            throw new IllegalArgumentException(
-                    "lengthUnit is required when any dimension is provided"
-            );
-        }
-
-        if (input.itemWeight() != null && input.weightUnit() == null) {
-            throw new IllegalArgumentException(
-                    "weightUnit is required when itemWeight is provided"
-            );
-        }
-    }
-
     private void applyBusinessDefaults(ShipmentEntity entity) {
         // Apply default status based on dates if not explicitly set
         if (entity.getStatus() == null) {
@@ -282,176 +260,6 @@ public class ShipmentService {
         }
 
         return !newValue.equals(existingValue);
-    }
-
-    private boolean isDimensionsChanged(ShipmentUpdateInput input, ShipmentEntity existing) {
-        if (input.dimensions() == null) {
-            return false;
-        }
-
-        return isChanged(input.dimensions().itemHeight(), existing.getItemHeight()) ||
-                isChanged(input.dimensions().itemLength(), existing.getItemLength()) ||
-                isChanged(input.dimensions().itemWeight(), existing.getItemWeight()) ||
-                isChanged(input.dimensions().itemWidth(), existing.getItemWidth()) ||
-                isChanged(input.dimensions().lengthUnit(), existing.getDimUnit()) ||
-                isChanged(input.dimensions().weightUnit(), existing.getWeightUnit());
-    }
-
-    private boolean isAddressChanged(AddressInput addressInput, Address existingAddress) {
-        if (addressInput == null) {
-            return false;
-        }
-
-        Address newAddress = mapper.toAddressEntity(addressInput);
-        return !newAddress.equals(existingAddress);
-    }
-
-    private void validateUpdate(ShipmentEntity existing, ShipmentUpdateInput input) {
-        // 1. Prevent updating immutable fields based on status
-        if (existing.getStatus() == ShipmentStatus.DELIVERED ||
-                existing.getStatus() == ShipmentStatus.CANCELLED) {
-            throw new InvalidShipmentStateException(
-                    "Cannot update a shipment that is " + existing.getStatus().name().toLowerCase()
-            );
-        }
-
-        // 2. Block updates after created status
-        if (existing.getStatus() != ShipmentStatus.CREATED) {
-            if (isChanged(input.shipperName(), existing.getShipperName()) ||
-                    isChanged(input.carrierName(), existing.getCarrierName()) ||
-                    isAddressChanged(input.pickupAddress(), existing.getPickupAddress()) ||
-                    isAddressChanged(input.deliveryAddress(), existing.getDeliveryAddress()) ||
-                    isDimensionsChanged(input, existing) ||
-                    isChanged(input.itemValue(), existing.getItemValue()) ||
-                    isChanged(input.rate(), existing.getRate())) {
-                throw new InvalidShipmentStateException(
-                        "Shipment details cannot be modified after it leaves CREATED state"
-                );
-            }
-        }
-
-        // 3. Date consistency validation
-        Instant newPickedUpAt = input.pickedUpAt() != null ? input.pickedUpAt() : existing.getPickedUpAt();
-        Instant newDeliveredAt = input.deliveredAt() != null ? input.deliveredAt() : existing.getDeliveredAt();
-
-        if (newDeliveredAt != null && newPickedUpAt == null) {
-            throw new InvalidShipmentStateException(
-                    "Cannot set delivery date without pickup date"
-            );
-        }
-
-        if (newPickedUpAt != null && newDeliveredAt != null && newDeliveredAt.isBefore(newPickedUpAt)) {
-            throw new InvalidShipmentStateException(
-                    "Delivery date must be after pickup date"
-            );
-        }
-
-        // 3. Status transition validation
-        if (input.status() != null && !input.status().equals(existing.getStatus())) {
-            validateStatusTransition(existing.getStatus(), input.status(), newPickedUpAt, newDeliveredAt);
-        }
-
-        // 4. Prevent backdating critical timestamps
-        if (input.pickedUpAt() != null && existing.getPickedUpAt() != null) {
-            if (input.pickedUpAt().isBefore(existing.getPickedUpAt())) {
-                throw new InvalidShipmentStateException(
-                        "Cannot backdate pickup time"
-                );
-            }
-        }
-
-        if (input.deliveredAt() != null && existing.getDeliveredAt() != null) {
-            if (input.deliveredAt().isBefore(existing.getDeliveredAt())) {
-                throw new InvalidShipmentStateException(
-                        "Cannot backdate delivery time"
-                );
-            }
-        }
-
-        validateDeliveryType(
-                input.pickupAddress(),
-                input.deliveryAddress(),
-                input.shipmentDeliveryType(),
-                existing.getPickupAddress(),
-                existing.getDeliveryAddress(),
-                existing.getShipmentDeliveryType()
-        );
-
-        if (existing.getTrackingNumber() != null && input.trackingNumber() != null && !input.trackingNumber().equals(existing.getTrackingNumber())) {
-            throw new InvalidShipmentStateException(
-                    "Tracking number cannot be updated once set"
-            );
-        }
-    }
-
-    private void validateDeliveryType(
-            AddressInput newPickupAddress,
-            AddressInput newDeliveryAddress,
-            ShipmentDeliveryType newDeliveryType,
-            Address existingPickupAddress,
-            Address existingDeliveryAddress,
-            ShipmentDeliveryType existingDeliveryType
-    ) {
-        ShipmentDeliveryType deliveryType =
-                newDeliveryType != null
-                        ? newDeliveryType
-                        : existingDeliveryType;
-
-        String pickupCountry = resolveCountry(
-                newPickupAddress,
-                existingPickupAddress
-        );
-
-        String deliveryCountry = resolveCountry(
-                newDeliveryAddress,
-                existingDeliveryAddress
-        );
-
-        if (deliveryType == ShipmentDeliveryType.SAME_DAY &&
-                pickupCountry != null &&
-                deliveryCountry != null &&
-                !pickupCountry.equalsIgnoreCase(deliveryCountry)) {
-
-            throw new InvalidShipmentStateException(
-                    "Same day delivery is applicable only for domestic shipments"
-            );
-        }
-    }
-
-    private void validateStatusTransition(
-            ShipmentStatus currentStatus,
-            ShipmentStatus newStatus,
-            Instant pickedUpAt,
-            Instant deliveredAt
-    ) {
-        // Define valid state transitions
-        Map<ShipmentStatus, Set<ShipmentStatus>> allowedTransitions = Map.of(
-                ShipmentStatus.CREATED, Set.of(ShipmentStatus.PICKED_UP, ShipmentStatus.CANCELLED),
-                ShipmentStatus.PICKED_UP, Set.of(ShipmentStatus.IN_TRANSIT, ShipmentStatus.CANCELLED),
-                ShipmentStatus.IN_TRANSIT, Set.of(ShipmentStatus.OUT_FOR_DELIVERY, ShipmentStatus.CANCELLED),
-                ShipmentStatus.OUT_FOR_DELIVERY, Set.of(ShipmentStatus.DELIVERED),
-                ShipmentStatus.DELIVERED, Set.of(),
-                ShipmentStatus.CANCELLED, Set.of()
-        );
-
-        if (!allowedTransitions.get(currentStatus).contains(newStatus)) {
-            throw new InvalidShipmentStateException(
-                    String.format("Cannot transition from %s to %s", currentStatus, newStatus)
-            );
-        }
-
-        // Status-specific validations
-        if (newStatus == ShipmentStatus.PICKED_UP && pickedUpAt == null) {
-            throw new InvalidShipmentStateException(
-                    "Cannot set status to PICKED_UP without pickup date"
-            );
-        }
-
-        if (newStatus == ShipmentStatus.DELIVERED && deliveredAt == null) {
-            throw new InvalidShipmentStateException(
-                    "Cannot set status to DELIVERED without delivery date"
-            );
-        }
     }
 
     private void updateIfPresent(ShipmentEntity existing, ShipmentUpdateInput input) {
@@ -551,7 +359,7 @@ public class ShipmentService {
         return null;
     }
 
-    private void publishCreatedEvent(ShipmentEntity s) {
+    private void publishTrackingEvent(ShipmentEntity s) {
         trackingEventPublisher.publish(new TrackingEvent(
                 s.getId(),
                 s.getStatus(),

@@ -3,9 +3,11 @@ package com.ultraship.tms.validations;
 import com.ultraship.tms.domain.ShipmentEntity;
 import com.ultraship.tms.domain.ShipmentStatus;
 import com.ultraship.tms.exception.InvalidShipmentStateException;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 @Component
+@Order(1)
 public class TerminalStateImmutableRule implements ShipmentValidationRule {
 
     @Override
