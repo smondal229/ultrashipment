@@ -8,6 +8,8 @@ import jakarta.validation.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.graphql.execution.DataFetcherExceptionResolverAdapter;
 import org.springframework.graphql.execution.ErrorType;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
@@ -37,8 +39,16 @@ public class GraphQLErrorHandler extends DataFetcherExceptionResolverAdapter {
             return buildConstraintViolationError(e);
         }
 
+        if (ex instanceof AccessDeniedException) {
+            return buildError("You are not authorized to perform this action", ErrorType.FORBIDDEN);
+        }
+
         if (ex instanceof DataIntegrityViolationException e) {
             return handleDataIntegrityViolation(e);
+        }
+
+        if (ex instanceof UsernameAlreadyPresentException) {
+            return buildError(ex.getMessage(), ErrorType.FORBIDDEN);
         }
 
         return buildError(
@@ -154,5 +164,12 @@ public class GraphQLErrorHandler extends DataFetcherExceptionResolverAdapter {
         }
 
         return propertyPath;
+    }
+
+    GraphQLError buildAccessDeniedError() {
+        return GraphqlErrorBuilder.newError()
+                        .message("You are not authorized to perform this action")
+                        .errorType(ErrorType.FORBIDDEN)
+                        .build();
     }
 }

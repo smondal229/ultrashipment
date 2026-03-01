@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 
 import java.math.BigDecimal;
@@ -55,6 +56,7 @@ public class ShipmentGraphQLController {
     }
 
     @MutationMapping(name="deleteShipmentById")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('DELETE_SHIPMENT')")
     public Boolean deleteShipment(@Argument Long id) {
         return service.deleteById(id);
     }
@@ -65,6 +67,7 @@ public class ShipmentGraphQLController {
     }
 
     @QueryMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public BigDecimal calculateRate(@Valid @Argument PricingRequest pricingRequest) {
         return service.calculateRate(pricingRequest);
     }

@@ -155,11 +155,30 @@ input DimensionsInput {
     weightUnit: String
 }
 
+type AuthResponse {
+    accessToken: String!
+    refreshToken: String!
+    username: String!
+}
+
 type Mutation {
     createShipment(input: ShipmentCreateInput!): Shipment
     updateShipment(id: ID!, input: ShipmentUpdateInput!): Shipment
     deleteShipmentById(id: ID!): Boolean
     flagShipmentById(id: ID!, flagged: Boolean!): Boolean
+
+    signup(username: String!, password: String!): Boolean!
+    login(username: String!, password: String!): AuthResponse!
+    refreshToken(refreshToken: String!): AuthResponse!
+    logout(refreshToken: String!): Boolean!
+
+    # --- EMAIL VERIFICATION ---
+    verifyEmail(token: String!): Boolean!
+    resendVerificationEmail(username: String!): Boolean!
+
+    # --- PASSWORD RESET ---
+    requestPasswordReset(username: String!): Boolean!
+    resetPassword(token: String!, newPassword: String!): Boolean!
 }
 
 enum ShipmentSortField {
@@ -236,4 +255,3 @@ type Query {
     getAllFilterOptions: ShipmentFilterOptions
     calculateRate(pricingRequest: PricingRequest!): Float!
 }
-
