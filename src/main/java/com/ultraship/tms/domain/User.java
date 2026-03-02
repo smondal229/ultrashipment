@@ -1,6 +1,7 @@
 package com.ultraship.tms.domain;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
@@ -19,6 +20,7 @@ public class User {
     private Long id;
 
     @Column(nullable = false, unique = true, length = 100)
+    @Email
     private String username;
 
     @Column(nullable = false, length = 255)

@@ -5,6 +5,7 @@ import com.ultraship.tms.exception.InvalidCredentialException;
 import com.ultraship.tms.exception.UserNotVerifiedException;
 import com.ultraship.tms.exception.UsernameAlreadyPresentException;
 import com.ultraship.tms.graphql.model.AuthResponse;
+import com.ultraship.tms.graphql.model.SignupInput;
 import com.ultraship.tms.messaging.model.MailEvent;
 import com.ultraship.tms.messaging.publisher.MailPublisher;
 import com.ultraship.tms.repository.EmailVerificationTokenRepository;
@@ -38,15 +39,15 @@ public class AuthService {
     private final MailPublisher mailPublisher;
 
 
-    public boolean signup(String username, String password) {
-        if (userRepository.findByUsername(username).isPresent()) {
+    public boolean signup(SignupInput signupInput) {
+        if (userRepository.findByUsername(signupInput.getUsername()).isPresent()) {
             throw new UsernameAlreadyPresentException("User already exists");
         }
 
         User user = new User();
-        user.setUsername(username);
-        user.setPassword(passwordEncoder.encode(password));
-        user.setRole(Role.EMPLOYEE);
+        user.setUsername(signupInput.getUsername());
+        user.setPassword(passwordEncoder.encode(signupInput.getPassword()));
+        user.setRole(signupInput.getRole());
         user.setVerified(false);
 
         userRepository.save(user);
@@ -55,13 +56,13 @@ public class AuthService {
 
         EmailVerificationToken verificationToken = new EmailVerificationToken();
         verificationToken.setToken(token);
-        verificationToken.setUsername(username);
+        verificationToken.setUsername(signupInput.getUsername());
         verificationToken.setExpiryDate(LocalDateTime.now().plusHours(24));
 
         emailVerificationTokenRepository.save(verificationToken);
 
         MailEvent event = new MailEvent(
-                username,
+                signupInput.getUsername(),
                 token,
                 MailEvent.MailType.VERIFICATION
         );

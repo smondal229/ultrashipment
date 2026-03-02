@@ -1,6 +1,7 @@
 package com.ultraship.tms.graphql.controller;
 
 import com.ultraship.tms.graphql.model.AuthResponse;
+import com.ultraship.tms.graphql.model.SignupInput;
 import com.ultraship.tms.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.graphql.data.method.annotation.Argument;
@@ -14,8 +15,8 @@ public class AuthController {
     private final AuthService authService;
 
     @MutationMapping
-    public Boolean signup(@Argument String username, @Argument String password) {
-        return authService.signup(username, password);
+    public Boolean signup(@Argument SignupInput signupInput) {
+        return authService.signup(signupInput);
     }
 
     @MutationMapping
