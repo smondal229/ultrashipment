@@ -9,8 +9,11 @@ import com.ultraship.tms.mapper.ShipmentMapper;
 import com.ultraship.tms.messaging.model.TrackingEvent;
 import com.ultraship.tms.messaging.publisher.TrackingEventPublisher;
 import com.ultraship.tms.repository.ShipmentRepository;
+import com.ultraship.tms.security.CustomUserPrincipal;
 import com.ultraship.tms.validations.ShipmentValidationContext;
 import com.ultraship.tms.validations.ShipmentValidator;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +35,8 @@ public class ShipmentService {
     private final TrackingEventPublisher trackingEventPublisher;
     private final CarrierRateFactory carrierRateFactory;
     private final ShipmentValidator shipmentValidator;
+    @PersistenceContext
+    private EntityManager entityManager;
 
 
     @Transactional(readOnly = true)
@@ -116,7 +121,7 @@ public class ShipmentService {
     }
 
 
-    public Shipment create(ShipmentCreateInput input) {
+    public Shipment create(CustomUserPrincipal principal, ShipmentCreateInput input) {
         try {
             ShipmentValidationContext context =
                     ShipmentValidationContext.forCreate(input);
@@ -124,12 +129,9 @@ public class ShipmentService {
             shipmentValidator.validate(context);
 
             ShipmentEntity entity = mapper.toEntity(input);
+            attachCreator(entity, principal);
             applyBusinessDefaults(entity);
-
-            entity.setTrackingNumber(
-                    new DefaultTrackingNumberGenerator()
-                            .generate(input.carrierName())
-            );
+            generateTrackingNumber(entity, input);
 
             ShipmentEntity savedEntity = shipmentRepository.save(entity);
             this.publishTrackingEvent(savedEntity);
@@ -140,7 +142,7 @@ public class ShipmentService {
         }
     }
 
-    public Shipment update(Long id, ShipmentUpdateInput input) {
+    public Shipment update(CustomUserPrincipal principal, Long id, ShipmentUpdateInput input) {
 
         ShipmentEntity existing = getById(id);
 
@@ -150,7 +152,7 @@ public class ShipmentService {
         shipmentValidator.validate(context);
 
         updateIfPresent(existing, input);
-
+        attachCreator(existing, principal);
         ShipmentEntity saved = shipmentRepository.save(existing);
         this.publishTrackingEvent(saved);
 
@@ -345,17 +347,16 @@ public class ShipmentService {
         }
     }
 
-    private String resolveCountry(AddressInput inputAddress, Address existingAddress) {
+    private void attachCreator(ShipmentEntity entity, CustomUserPrincipal principal) {
+        User userRef = entityManager.getReference(User.class, principal.getId());
+        entity.setCreatedBy(userRef);
+    }
 
-        if (inputAddress != null && inputAddress.getCountry() != null) {
-            return inputAddress.getCountry();
-        }
-
-        if (existingAddress != null) {
-            return existingAddress.getCountry();
-        }
-
-        return null;
+    private void generateTrackingNumber(ShipmentEntity entity, ShipmentCreateInput input) {
+        entity.setTrackingNumber(
+                new DefaultTrackingNumberGenerator()
+                        .generate(input.carrierName())
+        );
     }
 
     private void publishTrackingEvent(ShipmentEntity s) {
@@ -365,7 +366,8 @@ public class ShipmentService {
                 s.getCurrentLocation(),
                 "",
                 Instant.now(),
-                null
+                null,
+                s.getCreatedBy()
         ));
     }
 

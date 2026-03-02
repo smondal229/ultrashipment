@@ -32,6 +32,7 @@ type ShipmentTracking {
     status: String
     description: String
     eventTime: String
+    userId: ID
 }
 
 type PaymentMeta {
@@ -185,11 +186,9 @@ type Mutation {
     refreshToken(refreshToken: String!): AuthResponse!
     logout(refreshToken: String!): Boolean!
 
-    # --- EMAIL VERIFICATION ---
     verifyEmail(token: String!): Boolean!
     resendVerificationEmail(username: String!): Boolean!
 
-    # --- PASSWORD RESET ---
     requestPasswordReset(username: String!): Boolean!
     resetPassword(token: String!, newPassword: String!): Boolean!
 }
@@ -270,4 +269,5 @@ type Query {
 
     me: User!
     getAllUsers: [User!]!
+    getByUserIds(userIds: [ID!]!): [User!]!
 }

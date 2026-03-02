@@ -15,7 +15,8 @@ public class ShipmentTrackingMapper {
                 shipmentTracking.getStatus(),
                 shipmentTracking.getDescription(),
                 shipmentTracking.getEventTime(),
-                shipmentTracking.getCreatedAt()
+                shipmentTracking.getCreatedAt(),
+                shipmentTracking.getCreatedBy().getId()
         );
     }
 }

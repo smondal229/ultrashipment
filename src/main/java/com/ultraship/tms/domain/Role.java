@@ -11,11 +11,13 @@ public enum Role {
             Permission.CREATE_SHIPMENT,
             Permission.EDIT_SHIPMENT,
             Permission.DELETE_SHIPMENT,
+            Permission.FLAG_SHIPMENT,
             Permission.VIEW_USERS
     )),
 
     EMPLOYEE(Set.of(
-            Permission.VIEW_SHIPMENT
+            Permission.VIEW_SHIPMENT,
+            Permission.FLAG_SHIPMENT
     ));
 
     private final Set<Permission> permissions;

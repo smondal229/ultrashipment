@@ -42,4 +42,17 @@ public class UserService {
                 ))
                 .toList();
     }
+
+    public List<UserDto> getByUserIds(List<Long> userIds) {
+        return userRepository.findAllById(userIds)
+                .stream()
+                .map(u -> new UserDto(
+                    u.getId(),
+                    u.getUsername(),
+                    u.getRole(),
+                    u.isVerified(),
+                    null
+                ))
+                .toList();
+    }
 }

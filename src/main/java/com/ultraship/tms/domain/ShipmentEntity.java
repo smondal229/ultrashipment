@@ -1,6 +1,7 @@
 package com.ultraship.tms.domain;
 
 import jakarta.persistence.*;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -14,8 +15,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
-@Setter
-@Getter
+@Data
 @Entity
 @Table(name = "shipments")
 @EntityListeners(AuditingEntityListener.class)
@@ -105,6 +105,10 @@ public class ShipmentEntity {
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
     private PaymentMeta paymentMeta;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "created_by_id", nullable = false)
+    private User createdBy;
 
     @OneToMany(mappedBy = "shipment", fetch = FetchType.LAZY)
     @OrderBy("createdAt DESC")

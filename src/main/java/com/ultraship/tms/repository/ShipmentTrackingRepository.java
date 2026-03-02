@@ -20,9 +20,10 @@ public interface ShipmentTrackingRepository extends JpaRepository<ShipmentTracki
             status,
             location,
             event_time,
-            description
+            description,
+            created_by_id
         )
-        VALUES (:eventId, :shipmentId, :status, :location, :eventTime, :description)
+        VALUES (:eventId, :shipmentId, :status, :location, :eventTime, :description, :userId)
         ON CONFLICT (event_id) DO NOTHING
         """, nativeQuery = true)
     void insertIfNotExists(
@@ -31,6 +32,7 @@ public interface ShipmentTrackingRepository extends JpaRepository<ShipmentTracki
             String status,
             String location,
             Instant eventTime,
-            String description
+            String description,
+            String userId
     );
 }

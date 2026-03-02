@@ -10,5 +10,6 @@ public record ShipmentTracking(
     ShipmentStatus status,
     String description,
     Instant eventTime,
-    Instant createdAt
+    Instant createdAt,
+    Long userId
 ) {}
