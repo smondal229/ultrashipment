@@ -161,6 +161,19 @@ type AuthResponse {
     username: String!
 }
 
+type User {
+    id: ID!
+    username: String!
+    role: Role!
+    verified: Boolean!
+    authorities: [String!]
+}
+
+enum Role {
+    ADMIN
+    EMPLOYEE
+}
+
 type Mutation {
     createShipment(input: ShipmentCreateInput!): Shipment
     updateShipment(id: ID!, input: ShipmentUpdateInput!): Shipment
@@ -254,4 +267,7 @@ type Query {
 
     getAllFilterOptions: ShipmentFilterOptions
     calculateRate(pricingRequest: PricingRequest!): Float!
+
+    me: User!
+    getAllUsers: [User!]!
 }

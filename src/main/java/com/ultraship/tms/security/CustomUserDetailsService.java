@@ -28,18 +28,21 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         List<GrantedAuthority> authorities = new ArrayList<>();
 
-        // Add role
-        authorities.add(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
+        // Add permissions (scopes)
+        user.getRole().getPermissions()
+                .forEach(permission ->
+                        authorities.add(
+                                new SimpleGrantedAuthority(permission.name())
+                        )
+                );
 
-        // Add permissions
-        if (user.getRole() == Role.ADMIN) {
-            authorities.add(new SimpleGrantedAuthority("DELETE_SHIPMENT"));
-            authorities.add(new SimpleGrantedAuthority("VIEW_REPORT"));
-        }
 
-        return new org.springframework.security.core.userdetails.User(
+        return new CustomUserPrincipal(
+                user.getId(),
                 user.getUsername(),
                 user.getPassword(),
+                user.isVerified(),
+                user.getRole(),
                 authorities
         );
     }

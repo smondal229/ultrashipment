@@ -52,7 +52,7 @@ public class GraphQLErrorHandler extends DataFetcherExceptionResolverAdapter {
         }
 
         return buildError(
-                "Internal server error",
+                ex.getMessage(),
                 ErrorType.INTERNAL_ERROR
         );
     }

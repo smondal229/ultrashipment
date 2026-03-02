@@ -1,8 +1,12 @@
 package com.ultraship.tms.service;
 
 import com.ultraship.tms.domain.*;
+import com.ultraship.tms.exception.InvalidCredentialException;
+import com.ultraship.tms.exception.UserNotVerifiedException;
 import com.ultraship.tms.exception.UsernameAlreadyPresentException;
 import com.ultraship.tms.graphql.model.AuthResponse;
+import com.ultraship.tms.messaging.model.MailEvent;
+import com.ultraship.tms.messaging.publisher.MailPublisher;
 import com.ultraship.tms.repository.EmailVerificationTokenRepository;
 import com.ultraship.tms.repository.PasswordResetTokenRepository;
 import com.ultraship.tms.repository.RefreshTokenRepository;
@@ -31,38 +35,40 @@ public class AuthService {
     private final EmailVerificationTokenRepository emailVerificationTokenRepository;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final EmailService emailService;
+    private final MailPublisher mailPublisher;
 
 
     public boolean signup(String username, String password) {
-        try {
-            if (userRepository.findByUsername(username).isPresent()) {
-                throw new UsernameAlreadyPresentException("User already exists");
-            }
-
-            User user = new User();
-            user.setUsername(username);
-            user.setPassword(passwordEncoder.encode(password));
-            user.setRole(Role.EMPLOYEE);
-            user.setVerified(false);
-
-            userRepository.save(user);
-
-            String token = UUID.randomUUID().toString();
-
-            EmailVerificationToken verificationToken = new EmailVerificationToken();
-            verificationToken.setToken(token);
-            verificationToken.setUsername(username);
-            verificationToken.setExpiryDate(LocalDateTime.now().plusHours(24));
-
-            emailVerificationTokenRepository.save(verificationToken);
-
-            emailService.sendVerificationEmail(username, token);
-
-            return true;
-        } catch (RuntimeException e) {
-            log.error("User creation failed", e);
-            return false;
+        if (userRepository.findByUsername(username).isPresent()) {
+            throw new UsernameAlreadyPresentException("User already exists");
         }
+
+        User user = new User();
+        user.setUsername(username);
+        user.setPassword(passwordEncoder.encode(password));
+        user.setRole(Role.EMPLOYEE);
+        user.setVerified(false);
+
+        userRepository.save(user);
+
+        String token = UUID.randomUUID().toString();
+
+        EmailVerificationToken verificationToken = new EmailVerificationToken();
+        verificationToken.setToken(token);
+        verificationToken.setUsername(username);
+        verificationToken.setExpiryDate(LocalDateTime.now().plusHours(24));
+
+        emailVerificationTokenRepository.save(verificationToken);
+
+        MailEvent event = new MailEvent(
+                username,
+                token,
+                MailEvent.MailType.VERIFICATION
+        );
+
+        mailPublisher.publish(event);
+
+        return true;
     }
 
     public boolean verifyEmail(String token) {
@@ -180,7 +186,11 @@ public class AuthService {
                 .orElseThrow(() -> new RuntimeException("Invalid credentials"));
 
         if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new RuntimeException("Invalid credentials");
+            throw new InvalidCredentialException("Invalid credentials");
+        }
+
+        if (!user.isVerified()) {
+            throw new UserNotVerifiedException("User is not verified");
         }
 
         UserDetails userDetails =

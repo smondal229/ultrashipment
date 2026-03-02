@@ -1,6 +1,6 @@
-package com.ultraship.tms.messaging.consumers;
+package com.ultraship.tms.messaging.consumer;
 
-import com.ultraship.tms.messaging.config.RabbitMQConfig;
+import com.ultraship.tms.messaging.config.TrackingRabbitMQConfig;
 import com.ultraship.tms.messaging.model.TrackingEvent;
 import com.ultraship.tms.service.TrackingService;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 public class ShipmentEventConsumer {
     private final TrackingService trackingService;
 
-    @RabbitListener(queues = RabbitMQConfig.TRACKING_QUEUE)
+    @RabbitListener(queues = TrackingRabbitMQConfig.TRACKING_QUEUE)
     public void consume(TrackingEvent event) {
         log.info("Received shipment event: {}", event);
 

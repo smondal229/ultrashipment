@@ -1,14 +1,13 @@
 package com.ultraship.tms.service;
 
 import com.ultraship.tms.domain.*;
-import com.ultraship.tms.exception.InvalidShipmentStateException;
 import com.ultraship.tms.exception.ShipmentNotFoundException;
 import com.ultraship.tms.graphql.model.*;
 import com.ultraship.tms.graphql.utils.CursorPayload;
 import com.ultraship.tms.graphql.utils.CursorUtil;
 import com.ultraship.tms.mapper.ShipmentMapper;
 import com.ultraship.tms.messaging.model.TrackingEvent;
-import com.ultraship.tms.messaging.publishers.TrackingEventPublisher;
+import com.ultraship.tms.messaging.publisher.TrackingEventPublisher;
 import com.ultraship.tms.repository.ShipmentRepository;
 import com.ultraship.tms.validations.ShipmentValidationContext;
 import com.ultraship.tms.validations.ShipmentValidator;

@@ -1,6 +1,6 @@
-package com.ultraship.tms.messaging.publishers;
+package com.ultraship.tms.messaging.publisher;
 
-import com.ultraship.tms.messaging.config.RabbitMQConfig;
+import com.ultraship.tms.messaging.config.TrackingRabbitMQConfig;
 import com.ultraship.tms.messaging.model.TrackingEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -19,7 +19,7 @@ public class TrackingEventPublisher {
         event.setEventId(generateEventId());
 
         rabbitTemplate.convertAndSend(
-                RabbitMQConfig.TRACKING_EXCHANGE,
+                TrackingRabbitMQConfig.TRACKING_EXCHANGE,
                 routingKey,
                 event
         );
