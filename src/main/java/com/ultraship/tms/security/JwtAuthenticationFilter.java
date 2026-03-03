@@ -45,8 +45,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = authHeader.substring(7);
 
         if (!jwtService.validateToken(token)) {
+            SecurityContextHolder.clearContext();
             filterChain.doFilter(request, response);
-            throw new UnauthorizedException("Invalid token");
+            return;
         }
 
         String username = jwtService.extractUsername(token);
