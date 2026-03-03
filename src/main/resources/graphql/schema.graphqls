@@ -181,6 +181,16 @@ input SignupInput {
     role: Role
 }
 
+type VerifiedEmailResponse {
+    verifiedEmail: String!
+    success: Boolean!
+}
+
+type ResetPasswordResponse {
+    username: String!
+    success: Boolean!
+}
+
 type Mutation {
     createShipment(input: ShipmentCreateInput!): Shipment
     updateShipment(id: ID!, input: ShipmentUpdateInput!): Shipment
@@ -192,11 +202,11 @@ type Mutation {
     refreshToken(refreshToken: String!): AuthResponse!
     logout(refreshToken: String!): Boolean!
 
-    verifyEmail(token: String!): Boolean!
+    verifyEmail(token: String!): VerifiedEmailResponse
     resendVerificationEmail(username: String!): Boolean!
 
     requestPasswordReset(username: String!): Boolean!
-    resetPassword(token: String!, newPassword: String!): Boolean!
+    resetPassword(token: String!, newPassword: String!): ResetPasswordResponse
 }
 
 enum ShipmentSortField {

@@ -5,7 +5,9 @@ import com.ultraship.tms.exception.InvalidCredentialException;
 import com.ultraship.tms.exception.UserNotVerifiedException;
 import com.ultraship.tms.exception.UsernameAlreadyPresentException;
 import com.ultraship.tms.graphql.model.AuthResponse;
+import com.ultraship.tms.graphql.model.ResetPasswordResponse;
 import com.ultraship.tms.graphql.model.SignupInput;
+import com.ultraship.tms.graphql.model.VerifyEmailResponse;
 import com.ultraship.tms.messaging.model.MailEvent;
 import com.ultraship.tms.messaging.publisher.MailPublisher;
 import com.ultraship.tms.repository.EmailVerificationTokenRepository;
@@ -72,7 +74,7 @@ public class AuthService {
         return true;
     }
 
-    public boolean verifyEmail(String token) {
+    public VerifyEmailResponse verifyEmail(String token) {
         EmailVerificationToken verificationToken =
                 emailVerificationTokenRepository.findValidToken(token, LocalDateTime.now())
                         .orElseThrow(() -> new RuntimeException("Invalid token"));
@@ -95,7 +97,7 @@ public class AuthService {
         verificationToken.setUsed(true);
         emailVerificationTokenRepository.save(verificationToken);
 
-        return true;
+        return new VerifyEmailResponse(user.getUsername(), true);
     }
 
     @Transactional
@@ -152,7 +154,7 @@ public class AuthService {
         return true;
     }
 
-    public boolean resetPassword(String token, String newPassword) {
+    public ResetPasswordResponse resetPassword(String token, String newPassword) {
 
         PasswordResetToken resetToken =
                 passwordResetTokenRepository.findByToken(token)
@@ -178,7 +180,7 @@ public class AuthService {
 
         // IMPORTANT: revoke all refresh tokens
         refreshTokenRepository.revokeAllByUsername(user.getUsername());
-        return true;
+        return new ResetPasswordResponse(user.getUsername(), true);
     }
 
     public AuthResponse login(String username, String password) {

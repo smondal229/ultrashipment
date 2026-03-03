@@ -1,7 +1,9 @@
 package com.ultraship.tms.graphql.controller;
 
 import com.ultraship.tms.graphql.model.AuthResponse;
+import com.ultraship.tms.graphql.model.ResetPasswordResponse;
 import com.ultraship.tms.graphql.model.SignupInput;
+import com.ultraship.tms.graphql.model.VerifyEmailResponse;
 import com.ultraship.tms.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.graphql.data.method.annotation.Argument;
@@ -35,7 +37,7 @@ public class AuthController {
     }
 
     @MutationMapping
-    public boolean verifyEmail(@Argument String token) {
+    public VerifyEmailResponse verifyEmail(@Argument String token) {
         return authService.verifyEmail(token);
     }
 
@@ -50,7 +52,7 @@ public class AuthController {
     }
 
     @MutationMapping
-    public boolean resetPassword(@Argument String refreshToken, @Argument String newPassword) {
+    public ResetPasswordResponse resetPassword(@Argument String refreshToken, @Argument String newPassword) {
         return authService.resetPassword(refreshToken, newPassword);
     }
 
