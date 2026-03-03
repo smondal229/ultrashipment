@@ -26,7 +26,7 @@ public class UserController {
         return userService.getUserDetails(user);
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @QueryMapping
     public List<UserDto> getAllUsers() {
         return userService.getAllUsers();
