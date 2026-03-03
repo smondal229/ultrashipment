@@ -52,8 +52,8 @@ public class AuthController {
     }
 
     @MutationMapping
-    public ResetPasswordResponse resetPassword(@Argument String refreshToken, @Argument String newPassword) {
-        return authService.resetPassword(refreshToken, newPassword);
+    public ResetPasswordResponse resetPassword(@Argument String token, @Argument String newPassword) {
+        return authService.resetPassword(token, newPassword);
     }
 
     @MutationMapping
