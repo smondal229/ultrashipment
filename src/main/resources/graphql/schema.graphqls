@@ -273,7 +273,7 @@ type Query {
     getAllFilterOptions: ShipmentFilterOptions
     calculateRate(pricingRequest: PricingRequest!): Float!
 
-    me: User!
+    me: User
     getAllUsers: [User!]!
     getByUserIds(userIds: [ID!]!): [User!]!
 }
