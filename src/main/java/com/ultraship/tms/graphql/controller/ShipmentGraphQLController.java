@@ -42,13 +42,13 @@ public class ShipmentGraphQLController {
     }
 
     @MutationMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('CREATE_SHIPMENT')")
     public Shipment createShipment(@AuthenticationPrincipal CustomUserPrincipal principal, @Argument @Valid ShipmentCreateInput input) {
         return service.create(principal, input);
     }
 
     @MutationMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('EDIT_SHIPMENT')")
     public Shipment updateShipment(
             @AuthenticationPrincipal CustomUserPrincipal principal,
             @Argument Long id,
@@ -64,7 +64,7 @@ public class ShipmentGraphQLController {
     }
 
     @MutationMapping(name="deleteShipmentById")
-    @PreAuthorize("hasRole('ADMIN') or hasAuthority('DELETE_SHIPMENT')")
+    @PreAuthorize("hasAuthority('DELETE_SHIPMENT')")
     public Boolean deleteShipment(@Argument Long id) {
         return service.deleteById(id);
     }
@@ -76,7 +76,7 @@ public class ShipmentGraphQLController {
     }
 
     @QueryMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('FLAG_SHIPMENT')")
     public BigDecimal calculateRate(@Valid @Argument PricingRequest pricingRequest) {
         return service.calculateRate(pricingRequest);
     }

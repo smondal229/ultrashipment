@@ -64,6 +64,7 @@ public class GraphQLErrorHandler extends DataFetcherExceptionResolverAdapter {
     private GraphQLError buildError(String message, ErrorType errorType) {
         return GraphqlErrorBuilder.newError()
                 .message(message)
+                .extensions(Map.of("code", "UNAUTHENTICATED"))
                 .errorType(errorType)
                 .build();
     }
