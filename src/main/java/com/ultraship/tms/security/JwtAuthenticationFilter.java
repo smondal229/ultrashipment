@@ -1,5 +1,6 @@
 package com.ultraship.tms.security;
 
+import com.ultraship.tms.exception.UnauthorizedException;
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
@@ -37,7 +38,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (!jwtService.validateToken(token)) {
             filterChain.doFilter(request, response);
-            return;
+            throw new UnauthorizedException("Invalid token");
         }
 
         String username = jwtService.extractUsername(token);

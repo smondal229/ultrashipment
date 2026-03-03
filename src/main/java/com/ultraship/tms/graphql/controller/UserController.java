@@ -18,6 +18,7 @@ public class UserController {
 
     private final UserService userService;
 
+    @PreAuthorize("isAuthenticated()")
     @QueryMapping
     public UserDto me(
             @AuthenticationPrincipal CustomUserPrincipal user
@@ -31,6 +32,7 @@ public class UserController {
         return userService.getAllUsers();
     }
 
+    @PreAuthorize("isAuthenticated()")
     @QueryMapping
     public List<UserDto> getByUserIds(@Argument List<Long> userIds) {
         return userService.getByUserIds(userIds);

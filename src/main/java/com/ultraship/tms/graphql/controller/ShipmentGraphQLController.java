@@ -24,11 +24,13 @@ public class ShipmentGraphQLController {
 
     private final ShipmentService service;
 
+    @PreAuthorize("isAuthenticated()")
     @QueryMapping(name="getShipmentById")
     public Shipment getShipmentById(@Argument Long id, DataFetchingFieldSelectionSet selectionSet) {
         return service.getShipmentDetails(id, selectionSet.contains("tracking"));
     }
 
+    @PreAuthorize("isAuthenticated()")
     @QueryMapping(name="getShipments")
     public ShipmentOutput getShipments(
             @Argument int pageSize,
@@ -55,6 +57,7 @@ public class ShipmentGraphQLController {
         return service.update(principal, id, input);
     }
 
+    @PreAuthorize("isAuthenticated()")
     @MutationMapping(name="flagShipmentById")
     public Boolean flagShipment(@Argument Long id, @Argument Boolean flagged) {
         return service.flagShipment(id, flagged);
@@ -66,6 +69,7 @@ public class ShipmentGraphQLController {
         return service.deleteById(id);
     }
 
+    @PreAuthorize("isAuthenticated()")
     @QueryMapping(name="getAllFilterOptions")
     public Map<String, List<FilterOption>> getAllFilterOptions() {
         return service.getAllFilterOptions();

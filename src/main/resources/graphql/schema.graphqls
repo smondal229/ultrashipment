@@ -175,13 +175,19 @@ enum Role {
     EMPLOYEE
 }
 
+input SignupInput {
+    username: String!
+    password: String!
+    role: Role
+}
+
 type Mutation {
     createShipment(input: ShipmentCreateInput!): Shipment
     updateShipment(id: ID!, input: ShipmentUpdateInput!): Shipment
     deleteShipmentById(id: ID!): Boolean
     flagShipmentById(id: ID!, flagged: Boolean!): Boolean
 
-    signup(username: String!, password: String!): Boolean!
+    signup(signupInput: SignupInput!): Boolean!
     login(username: String!, password: String!): AuthResponse!
     refreshToken(refreshToken: String!): AuthResponse!
     logout(refreshToken: String!): Boolean!

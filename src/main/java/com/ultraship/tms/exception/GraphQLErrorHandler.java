@@ -51,6 +51,10 @@ public class GraphQLErrorHandler extends DataFetcherExceptionResolverAdapter {
             return buildError(ex.getMessage(), ErrorType.FORBIDDEN);
         }
 
+        if (ex instanceof UnauthorizedException) {
+            return buildError(ex.getMessage(), ErrorType.UNAUTHORIZED);
+        }
+
         return buildError(
                 ex.getMessage(),
                 ErrorType.INTERNAL_ERROR
@@ -58,7 +62,6 @@ public class GraphQLErrorHandler extends DataFetcherExceptionResolverAdapter {
     }
 
     private GraphQLError buildError(String message, ErrorType errorType) {
-
         return GraphqlErrorBuilder.newError()
                 .message(message)
                 .errorType(errorType)
@@ -66,7 +69,6 @@ public class GraphQLErrorHandler extends DataFetcherExceptionResolverAdapter {
     }
 
     private GraphQLError buildValidationError(BindException ex) {
-
         Map<String, String> validationErrors =
                 ex.getFieldErrors()
                         .stream()
