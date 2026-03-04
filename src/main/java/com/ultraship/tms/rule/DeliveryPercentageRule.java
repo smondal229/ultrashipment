@@ -1,6 +1,7 @@
 package com.ultraship.tms.rule;
 
 import com.ultraship.tms.domain.ShipmentDeliveryType;
+import com.ultraship.tms.graphql.model.PricingContext;
 import com.ultraship.tms.graphql.model.PricingRequest;
 
 import java.math.BigDecimal;
@@ -15,13 +16,14 @@ public class DeliveryPercentageRule implements PricingRule {
     }
 
     @Override
-    public BigDecimal apply(BigDecimal currentRate, PricingRequest request) {
+    public void apply(PricingContext pricingContext, PricingRequest request) {
+        BigDecimal currentRate = pricingContext.getRate();
 
         BigDecimal percent = percentages.getOrDefault(
                 request.getDeliveryType(),
                 BigDecimal.ZERO
         );
 
-        return currentRate.add(currentRate.multiply(percent));
+        pricingContext.setRate(currentRate.add(currentRate.multiply(percent)));
     }
 }

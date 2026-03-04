@@ -1,5 +1,6 @@
 package com.ultraship.tms.rule;
 
+import com.ultraship.tms.graphql.model.PricingContext;
 import com.ultraship.tms.graphql.model.PricingRequest;
 
 import java.math.BigDecimal;
@@ -13,12 +14,13 @@ public class InternationalRule implements PricingRule {
     }
 
     @Override
-    public BigDecimal apply(BigDecimal currentRate, PricingRequest req) {
-
-        if (!req.getPickupCountry().equalsIgnoreCase(req.getDeliveryCountry())) {
-            return currentRate.add(surcharge);
+    public void apply(PricingContext pricingContext, PricingRequest request) {
+        BigDecimal currentRate = pricingContext.getRate();
+        if (!request.getPickupCountry().equalsIgnoreCase(request.getDeliveryCountry())) {
+            pricingContext.setRate(currentRate.add(surcharge));
+            return;
         }
 
-        return currentRate;
+        pricingContext.setRate(currentRate);
     }
 }

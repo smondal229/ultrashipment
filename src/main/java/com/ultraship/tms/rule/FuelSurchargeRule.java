@@ -1,5 +1,6 @@
 package com.ultraship.tms.rule;
 
+import com.ultraship.tms.graphql.model.PricingContext;
 import com.ultraship.tms.graphql.model.PricingRequest;
 
 import java.math.BigDecimal;
@@ -14,12 +15,13 @@ public class FuelSurchargeRule implements PricingRule {
     }
 
     @Override
-    public BigDecimal apply(BigDecimal currentRate, PricingRequest request) {
+    public void apply(PricingContext pricingContext, PricingRequest request) {
+        BigDecimal currentRate = pricingContext.getRate();
 
         BigDecimal fuelCharge = currentRate
                 .multiply(fuelPercentage)
                 .divide(BigDecimal.valueOf(100), 6, RoundingMode.HALF_UP);
 
-        return currentRate.add(fuelCharge);
+        pricingContext.setRate(currentRate.add(fuelCharge));
     }
 }

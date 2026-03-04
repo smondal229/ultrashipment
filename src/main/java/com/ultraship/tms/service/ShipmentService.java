@@ -206,6 +206,8 @@ public class ShipmentService {
     }
 
     public BigDecimal calculateRate(PricingRequest request) {
+
+        // TODO add validation for SAME DAY delivery
         CarrierRateCalculator calculator =
                 carrierRateFactory.get(request.getCarrierName());
 

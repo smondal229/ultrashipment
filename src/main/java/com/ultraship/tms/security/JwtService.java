@@ -2,6 +2,8 @@ package com.ultraship.tms.security;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -12,14 +14,16 @@ import java.util.Date;
 @Service
 public class JwtService {
 
-    private final String SECRET =
-            "this-is-a-very-long-super-secure-32-character-secret-key";
+    @Value("${jwt.secret}")
+    private String jwtSecret;
 
-    private final long ACCESS_EXPIRATION = 1000 * 60 * 5; // 5 min
-    private final long REFRESH_EXPIRATION = 1000L * 60 * 60 * 24 * 7; // 7 days
+    @Value("${jwt.access-token.expiration}")
+    private long ACCESS_EXPIRATION;
+    @Value("${jwt.refresh-token.expiration}")
+    private long REFRESH_EXPIRATION;
 
     private Key getKey() {
-        return Keys.hmacShaKeyFor(SECRET.getBytes());
+        return Keys.hmacShaKeyFor(jwtSecret.getBytes());
     }
 
     public boolean validateToken(String token) {

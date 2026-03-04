@@ -1,5 +1,6 @@
 package com.ultraship.tms.rule;
 
+import com.ultraship.tms.graphql.model.PricingContext;
 import com.ultraship.tms.graphql.model.PricingRequest;
 
 import java.math.BigDecimal;
@@ -13,7 +14,8 @@ public class GstRule implements PricingRule {
     }
 
     @Override
-    public BigDecimal apply(BigDecimal currentRate, PricingRequest request) {
-        return currentRate.add(currentRate.multiply(gstPercent));
+    public void apply(PricingContext pricingContext, PricingRequest request) {
+        BigDecimal currentRate = pricingContext.getRate();
+        pricingContext.setRate(currentRate.add(currentRate.multiply(gstPercent)));
     }
 }

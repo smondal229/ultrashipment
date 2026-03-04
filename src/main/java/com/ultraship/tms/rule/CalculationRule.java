@@ -3,9 +3,6 @@ package com.ultraship.tms.rule;
 import com.ultraship.tms.graphql.model.PricingContext;
 import com.ultraship.tms.graphql.model.PricingRequest;
 
-import java.math.BigDecimal;
-
-public interface PricingRule {
-
-    void apply(PricingContext pricingContext, PricingRequest request);
+public interface CalculationRule {
+    void apply(PricingContext context, PricingRequest request);
 }
