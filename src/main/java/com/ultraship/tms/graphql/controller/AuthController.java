@@ -42,7 +42,7 @@ public class AuthController {
     }
 
     @MutationMapping
-    public boolean resend(@Argument String username) {
+    public boolean resendVerificationEmail(@Argument String username) {
         return authService.resendVerificationEmail(username);
     }
 
