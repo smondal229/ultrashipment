@@ -33,6 +33,6 @@ public interface ShipmentTrackingRepository extends JpaRepository<ShipmentTracki
             String location,
             Instant eventTime,
             String description,
-            String userId
+            Long userId
     );
 }

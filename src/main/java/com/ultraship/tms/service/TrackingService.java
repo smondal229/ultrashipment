@@ -30,7 +30,7 @@ public class TrackingService {
                     event.getLocation(),
                     event.getEventTime(),
                     event.getDescription(),
-                    String.valueOf(event.getCreatedBy().getId())
+                    event.getCreatedById()
             );
         } catch (Exception e) {
             log.error("Create tracking event error: ", e);

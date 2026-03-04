@@ -369,7 +369,7 @@ public class ShipmentService {
                 "",
                 Instant.now(),
                 null,
-                s.getCreatedBy()
+                s.getCreatedBy().getId()
         ));
     }
 

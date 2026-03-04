@@ -21,5 +21,5 @@ public class TrackingEvent {
     private Instant eventTime;
     @Setter
     private UUID eventId;
-    private User createdBy;
+    private Long createdById;
 }

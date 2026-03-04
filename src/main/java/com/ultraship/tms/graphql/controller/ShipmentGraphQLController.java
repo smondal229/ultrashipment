@@ -76,7 +76,7 @@ public class ShipmentGraphQLController {
     }
 
     @QueryMapping
-//    @PreAuthorize("hasAuthority('FLAG_SHIPMENT')")
+    @PreAuthorize("hasAuthority('CREATE_SHIPMENT')")
     public BigDecimal calculateRate(@Valid @Argument PricingRequest pricingRequest) {
         return service.calculateRate(pricingRequest);
     }
