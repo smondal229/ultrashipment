@@ -15,7 +15,7 @@ public class JwtService {
     private final String SECRET =
             "this-is-a-very-long-super-secure-32-character-secret-key";
 
-    private final long ACCESS_EXPIRATION = 1000 * 60 * 15; // 15 min
+    private final long ACCESS_EXPIRATION = 1000 * 60 * 5; // 5 min
     private final long REFRESH_EXPIRATION = 1000L * 60 * 60 * 24 * 7; // 7 days
 
     private Key getKey() {
