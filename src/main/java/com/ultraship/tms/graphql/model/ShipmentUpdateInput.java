@@ -16,9 +16,7 @@ public record ShipmentUpdateInput(
         @Positive(message = "Rate must be positive")
         BigDecimal rate,
         ShipmentStatus status,
-        @Future
         Instant pickedUpAt,
-        @Future
         Instant deliveredAt,
         @Positive(message = "Item value must be positive")
         BigDecimal itemValue,
