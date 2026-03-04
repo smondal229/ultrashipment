@@ -83,17 +83,8 @@ public class MailjetEmailService implements EmailService {
         HttpEntity<Map<String, Object>> request =
                 new HttpEntity<>(payload, headers);
 
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            System.out.println("FINAL JSON:");
-            System.out.println(mapper.writeValueAsString(payload));
-        } catch (JsonProcessingException e) {
-
-        }
         ResponseEntity<String> response =
                 restTemplate.postForEntity(url, request, String.class);
-
-        System.out.println(response.getBody());
     }
 
     private String buildHtml(String buttonText, String link) {
