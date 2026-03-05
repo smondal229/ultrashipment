@@ -12,10 +12,13 @@ public enum Role {
             Permission.EDIT_SHIPMENT,
             Permission.DELETE_SHIPMENT,
             Permission.FLAG_SHIPMENT,
-            Permission.VIEW_USERS
+            Permission.VIEW_USERS,
+            Permission.VIEW_SHIPMENT
     )),
 
     EMPLOYEE(Set.of(
+            Permission.CREATE_SHIPMENT,
+            Permission.EDIT_SHIPMENT,
             Permission.VIEW_SHIPMENT,
             Permission.FLAG_SHIPMENT
     ));

@@ -86,7 +86,8 @@ public class ShipmentResolver {
     }
 
     @QueryMapping
-    @PreAuthorize("hasAuthority('CREATE_SHIPMENT')")
+    @PreAuthorize("hasAuthority('CREATE_SHIPMENT') or hasAuthority('EDIT_SHIPMENT')")
+    @RateLimit(limit = 50, duration = 60)
     public BigDecimal calculateRate(@Valid @Argument PricingRequest pricingRequest) {
         return service.calculateRate(pricingRequest);
     }
