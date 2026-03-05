@@ -14,7 +14,7 @@ public class Webconfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/graphql")
-                        .allowedOrigins("http://localhost:5173") // React frontend
+                        .allowedOriginPatterns("https://*.netlify.app", "http://localhost:5173")
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowCredentials(true);
             }
