@@ -1,9 +1,10 @@
 # TMS — Transportation Management System
 
-A modular **Transportation Management System (TMS)** backend built with Java and Spring Boot.
-The system manages shipment lifecycles, pricing calculations, validation pipelines, authentication, and event-driven messaging.
+A modular **Transportation Management System (TMS)** backend built with **Java, Spring Boot, and GraphQL**.
 
-The architecture focuses on **clean separation of concerns, extensible rule engines, and scalable messaging**, making it easy to extend the system with new carriers, pricing rules, and shipment workflows.
+The system manages the complete **shipment lifecycle**, including shipment creation, validation, pricing calculations, authentication, and event-driven integrations with external systems.
+
+The architecture follows a **modular monolith design** with clear domain boundaries and extensible rule engines, enabling the platform to scale and evolve as new logistics workflows, pricing strategies, and carrier integrations are introduced.
 
 ---
 
