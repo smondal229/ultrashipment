@@ -41,25 +41,25 @@ public class AuthResolver {
     }
 
     @MutationMapping
-    @RateLimit(limit = 1, duration = 30)
+    @RateLimit(limit = 2, duration = 30)
     public VerifyEmailResponse verifyEmail(@Argument String token) {
         return authService.verifyEmail(token);
     }
 
     @MutationMapping
-    @RateLimit(limit = 1, duration = 30)
+    @RateLimit(limit = 2, duration = 30)
     public boolean resendVerificationEmail(@Argument String username) {
         return authService.resendVerificationEmail(username);
     }
 
     @MutationMapping
-    @RateLimit(limit = 1, duration = 60)
+    @RateLimit(limit = 2, duration = 60)
     public boolean requestPasswordReset(@Argument String username) {
         return authService.requestPasswordReset(username);
     }
 
     @MutationMapping
-    @RateLimit(limit = 1, duration = 60)
+    @RateLimit(limit = 2, duration = 60)
     public ResetPasswordResponse resetPassword(@Argument String token, @Argument String newPassword) {
         return authService.resetPassword(token, newPassword);
     }
