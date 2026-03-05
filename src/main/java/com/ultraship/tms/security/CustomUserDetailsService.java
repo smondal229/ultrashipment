@@ -1,7 +1,6 @@
 package com.ultraship.tms.security;
 
-import com.ultraship.tms.domain.Role;
-import com.ultraship.tms.domain.User;
+import com.ultraship.tms.domain.entity.User;
 import com.ultraship.tms.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;

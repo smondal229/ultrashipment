@@ -1,13 +1,16 @@
 package com.ultraship.tms.service;
 
-import com.ultraship.tms.domain.*;
-import com.ultraship.tms.exception.InvalidCredentialException;
-import com.ultraship.tms.exception.UserNotVerifiedException;
-import com.ultraship.tms.exception.UsernameAlreadyPresentException;
-import com.ultraship.tms.graphql.model.AuthResponse;
-import com.ultraship.tms.graphql.model.ResetPasswordResponse;
-import com.ultraship.tms.graphql.model.SignupInput;
-import com.ultraship.tms.graphql.model.VerifyEmailResponse;
+import com.ultraship.tms.domain.entity.EmailVerificationToken;
+import com.ultraship.tms.domain.entity.PasswordResetToken;
+import com.ultraship.tms.domain.entity.RefreshToken;
+import com.ultraship.tms.domain.entity.User;
+import com.ultraship.tms.exception.auth.InvalidCredentialException;
+import com.ultraship.tms.exception.auth.UserNotVerifiedException;
+import com.ultraship.tms.exception.auth.UsernameAlreadyPresentException;
+import com.ultraship.tms.graphql.model.output.AuthResponse;
+import com.ultraship.tms.graphql.model.output.ResetPasswordResponse;
+import com.ultraship.tms.graphql.model.input.SignupInput;
+import com.ultraship.tms.graphql.model.output.VerifyEmailResponse;
 import com.ultraship.tms.messaging.model.MailEvent;
 import com.ultraship.tms.messaging.publisher.MailPublisher;
 import com.ultraship.tms.repository.EmailVerificationTokenRepository;

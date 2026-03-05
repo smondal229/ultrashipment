@@ -1,8 +1,12 @@
 package com.ultraship.tms.mapper;
 
-import com.ultraship.tms.domain.Address;
-import com.ultraship.tms.domain.ShipmentEntity;
-import com.ultraship.tms.graphql.model.*;
+import com.ultraship.tms.domain.entity.Address;
+import com.ultraship.tms.domain.entity.ShipmentEntity;
+import com.ultraship.tms.graphql.model.input.AddressInput;
+import com.ultraship.tms.graphql.model.input.Dimensions;
+import com.ultraship.tms.graphql.model.input.ShipmentCreateInput;
+import com.ultraship.tms.graphql.model.output.Shipment;
+import com.ultraship.tms.graphql.model.output.ShipmentTracking;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

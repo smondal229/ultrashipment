@@ -1,0 +1,8 @@
+package com.ultraship.tms.exception.shipments;
+
+public class ShipmentNotFoundException extends RuntimeException {
+
+    public ShipmentNotFoundException(Long id) {
+        super("Shipment not found: " + id);
+    }
+}

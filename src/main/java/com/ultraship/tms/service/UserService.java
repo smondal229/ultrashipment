@@ -1,7 +1,6 @@
 package com.ultraship.tms.service;
 
-import com.ultraship.tms.domain.User;
-import com.ultraship.tms.graphql.model.UserDto;
+import com.ultraship.tms.graphql.model.output.UserDto;
 import com.ultraship.tms.repository.UserRepository;
 import com.ultraship.tms.security.CustomUserPrincipal;
 import lombok.RequiredArgsConstructor;

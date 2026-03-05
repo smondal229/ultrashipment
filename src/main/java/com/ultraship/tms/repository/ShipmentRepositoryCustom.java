@@ -1,8 +1,8 @@
 package com.ultraship.tms.repository;
 
-import com.ultraship.tms.domain.ShipmentEntity;
-import com.ultraship.tms.graphql.model.ShipmentFilter;
-import com.ultraship.tms.graphql.model.ShipmentSort;
+import com.ultraship.tms.domain.entity.ShipmentEntity;
+import com.ultraship.tms.graphql.model.filter.ShipmentFilter;
+import com.ultraship.tms.graphql.model.filter.ShipmentSort;
 import com.ultraship.tms.graphql.utils.CursorPayload;
 
 import java.util.List;

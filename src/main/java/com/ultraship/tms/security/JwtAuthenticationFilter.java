@@ -1,6 +1,5 @@
 package com.ultraship.tms.security;
 
-import com.ultraship.tms.exception.UnauthorizedException;
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;

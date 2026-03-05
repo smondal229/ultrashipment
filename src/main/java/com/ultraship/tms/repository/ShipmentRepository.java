@@ -2,7 +2,7 @@ package com.ultraship.tms.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.ultraship.tms.domain.ShipmentEntity;
+import com.ultraship.tms.domain.entity.ShipmentEntity;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.repository.query.Param;

@@ -1,9 +1,7 @@
 package com.ultraship.tms.messaging.model;
 
-import com.ultraship.tms.domain.ShipmentStatus;
-import com.ultraship.tms.domain.User;
+import com.ultraship.tms.domain.enums.ShipmentStatus;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 

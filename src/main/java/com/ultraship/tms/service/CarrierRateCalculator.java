@@ -1,9 +1,8 @@
 package com.ultraship.tms.service;
-import com.ultraship.tms.graphql.model.PricingContext;
-import com.ultraship.tms.graphql.model.PricingRequest;
-import com.ultraship.tms.graphql.utils.BaseRateCalculator;
-import com.ultraship.tms.rule.CalculationRule;
-import com.ultraship.tms.rule.PricingRule;
+import com.ultraship.tms.rule.pricing.context.PricingContext;
+import com.ultraship.tms.graphql.model.input.PricingRequest;
+import com.ultraship.tms.rule.chargeprocessing.CalculationRule;
+import com.ultraship.tms.rule.pricing.PricingRule;
 import lombok.AllArgsConstructor;
 
 import java.math.BigDecimal;

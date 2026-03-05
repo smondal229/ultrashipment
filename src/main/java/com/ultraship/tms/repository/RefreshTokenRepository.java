@@ -1,6 +1,6 @@
 package com.ultraship.tms.repository;
 
-import com.ultraship.tms.domain.RefreshToken;
+import com.ultraship.tms.domain.entity.RefreshToken;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

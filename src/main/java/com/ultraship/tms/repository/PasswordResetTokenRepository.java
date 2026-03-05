@@ -1,6 +1,6 @@
 package com.ultraship.tms.repository;
 
-import com.ultraship.tms.domain.PasswordResetToken;
+import com.ultraship.tms.domain.entity.PasswordResetToken;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

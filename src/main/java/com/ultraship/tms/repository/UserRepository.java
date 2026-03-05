@@ -1,6 +1,6 @@
 package com.ultraship.tms.repository;
 
-import com.ultraship.tms.domain.User;
+import com.ultraship.tms.domain.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

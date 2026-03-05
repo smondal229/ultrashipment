@@ -1,11 +1,12 @@
 package com.ultraship.tms.service;
 
-import com.ultraship.tms.domain.Carrier;
-import com.ultraship.tms.domain.ShipmentDeliveryType;
-import com.ultraship.tms.graphql.model.WeightSlab;
-import com.ultraship.tms.graphql.utils.BaseRateCalculator;
+import com.ultraship.tms.domain.enums.Carrier;
+import com.ultraship.tms.domain.enums.ShipmentDeliveryType;
+import com.ultraship.tms.rule.pricing.model.WeightSlab;
 
-import com.ultraship.tms.rule.*;
+import com.ultraship.tms.rule.chargeprocessing.CalculationRule;
+import com.ultraship.tms.rule.chargeprocessing.ChargeableWeightRule;
+import com.ultraship.tms.rule.pricing.*;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;

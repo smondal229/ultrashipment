@@ -1,0 +1,36 @@
+package com.ultraship.tms.graphql.model.output;
+
+import com.ultraship.tms.domain.enums.*;
+import com.ultraship.tms.domain.model.PaymentMeta;
+import com.ultraship.tms.graphql.model.input.AddressInput;
+
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.List;
+
+public record Shipment(
+        Long id,
+        String shipperName,
+        Carrier carrierName,
+        AddressInput pickupAddress,
+        AddressInput deliveryAddress,
+        String currentLocation,
+        String trackingNumber,
+        BigDecimal rate,
+        ShipmentStatus status,
+        Instant pickedUpAt,
+        Instant deliveredAt,
+        Instant createdAt,
+        Instant updatedAt,
+        BigDecimal itemValue,
+        BigDecimal itemWeight,
+        BigDecimal itemLength,
+        BigDecimal itemHeight,
+        BigDecimal itemWidth,
+        LengthUnit lengthUnit,
+        WeightUnit weightUnit,
+        PaymentMeta paymentMeta,
+        ShipmentDeliveryType shipmentDeliveryType,
+        Boolean isFlagged,
+        List<ShipmentTracking> tracking
+) {}

@@ -1,10 +1,8 @@
 package com.ultraship.tms.mapper;
 
-import com.ultraship.tms.domain.ShipmentTrackingEntity;
-import com.ultraship.tms.graphql.model.ShipmentTracking;
+import com.ultraship.tms.domain.entity.ShipmentTrackingEntity;
+import com.ultraship.tms.graphql.model.output.ShipmentTracking;
 import org.springframework.stereotype.Component;
-
-import java.time.Instant;
 
 @Component
 public class ShipmentTrackingMapper {
