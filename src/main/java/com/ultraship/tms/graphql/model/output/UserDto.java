@@ -14,6 +14,7 @@ public class UserDto {
     private String username;
     private Role role;
     private boolean verified;
+    private boolean active;
     @Nullable
     private List<String> authorities;
 }

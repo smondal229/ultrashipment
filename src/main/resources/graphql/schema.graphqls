@@ -165,8 +165,9 @@ type AuthResponse {
 type User {
     id: ID!
     username: String!
-    role: Role!
+    role: Role
     verified: Boolean!
+    active: Boolean
     authorities: [String!]
 }
 
@@ -207,6 +208,8 @@ type Mutation {
 
     requestPasswordReset(username: String!): Boolean!
     resetPassword(token: String!, newPassword: String!): ResetPasswordResponse
+
+    changeActiveStatus(userId: ID!, activeStatus: Boolean): Boolean!
 }
 
 enum ShipmentSortField {

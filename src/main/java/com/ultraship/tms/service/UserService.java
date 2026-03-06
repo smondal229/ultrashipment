@@ -5,7 +5,9 @@ import com.ultraship.tms.repository.UserRepository;
 import com.ultraship.tms.security.CustomUserPrincipal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -21,6 +23,7 @@ public class UserService {
             user.getUsername(),
             user.getRole(),
             user.isVerified(),
+            user.isActive(),
             user.getAuthorities()
                     .stream()
                     .map(GrantedAuthority::getAuthority)
@@ -37,6 +40,7 @@ public class UserService {
                         u.getUsername(),
                         u.getRole(),
                         u.isVerified(),
+                        u.isActive(),
                         null
                 ))
                 .toList();
@@ -50,8 +54,16 @@ public class UserService {
                     u.getUsername(),
                     u.getRole(),
                     u.isVerified(),
+                    u.isActive(),
                     null
                 ))
                 .toList();
+    }
+
+    @Transactional
+    public boolean changeActiveStatus(Long userId, Boolean activeStatus) {
+        int updated = userRepository.changeActiveStatus(userId, activeStatus);
+
+        return updated != 0;
     }
 }

@@ -6,5 +6,6 @@ public enum Permission {
     DELETE_SHIPMENT,
     FLAG_SHIPMENT,
     VIEW_SHIPMENT,
-    VIEW_USERS
+    VIEW_USERS,
+    DELETE_USERS
 }

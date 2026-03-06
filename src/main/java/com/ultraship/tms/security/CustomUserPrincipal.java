@@ -16,6 +16,7 @@ public class CustomUserPrincipal implements UserDetails {
     private String username;
     private String password;
     private boolean verified;
+    private boolean active;
     private Role role;
     private Collection<? extends GrantedAuthority> authorities;
 
@@ -41,6 +42,6 @@ public class CustomUserPrincipal implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return this.isVerified();
+        return this.isVerified() && this.isActive();
     }
 }
