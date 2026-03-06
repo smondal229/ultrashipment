@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Email;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
 
@@ -32,6 +33,9 @@ public class User {
     @Column(nullable = false)
     private boolean verified = false;
 
+    @Column(nullable = false)
+    private boolean active = true;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -39,4 +43,12 @@ public class User {
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    public UserDetails toUserDetails() {
+        return org.springframework.security.core.userdetails.User
+                .withUsername(this.getUsername())
+                .password(this.getPassword())
+                .authorities(String.valueOf(this.getRole()))
+                .build();
+    }
 }

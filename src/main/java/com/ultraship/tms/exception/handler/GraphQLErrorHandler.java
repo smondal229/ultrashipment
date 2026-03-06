@@ -1,6 +1,8 @@
 package com.ultraship.tms.exception.handler;
 
+import com.ultraship.tms.exception.auth.InvalidCredentialException;
 import com.ultraship.tms.exception.auth.UnauthorizedException;
+import com.ultraship.tms.exception.auth.UserNotVerifiedException;
 import com.ultraship.tms.exception.auth.UsernameAlreadyPresentException;
 import com.ultraship.tms.exception.ratelimit.RatelimitException;
 import com.ultraship.tms.exception.shipments.InvalidShipmentStateException;
@@ -16,6 +18,7 @@ import org.springframework.graphql.execution.ErrorType;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
@@ -54,6 +57,10 @@ public class GraphQLErrorHandler extends DataFetcherExceptionResolverAdapter {
 
         if (ex instanceof UsernameAlreadyPresentException) {
             return buildError(ex.getMessage(), ErrorType.FORBIDDEN, HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+
+        if (ex instanceof UsernameNotFoundException) {
+            return buildError(ex.getMessage(), ErrorType.NOT_FOUND, HttpStatus.UNAUTHORIZED);
         }
 
         if (ex instanceof UnauthorizedException) {

@@ -6,6 +6,7 @@ import com.ultraship.tms.graphql.model.input.SignupInput;
 import com.ultraship.tms.graphql.model.output.VerifyEmailResponse;
 import com.ultraship.tms.ratelimiter.RateLimit;
 import com.ultraship.tms.service.AuthService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
@@ -19,7 +20,7 @@ public class AuthResolver {
 
     @MutationMapping
     @RateLimit(limit = 3, duration = 60)
-    public Boolean signup(@Argument SignupInput signupInput) {
+    public Boolean signup(@Argument @Valid SignupInput signupInput) {
         return authService.signup(signupInput);
     }
 

@@ -25,6 +25,10 @@ public class CustomUserDetailsService implements UserDetailsService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
+        if (!user.isActive()) {
+            throw new UsernameNotFoundException("User not found");
+        }
+
         List<GrantedAuthority> authorities = new ArrayList<>();
 
         // Add permissions (scopes)

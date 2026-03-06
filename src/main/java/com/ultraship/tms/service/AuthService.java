@@ -4,6 +4,7 @@ import com.ultraship.tms.domain.entity.EmailVerificationToken;
 import com.ultraship.tms.domain.entity.PasswordResetToken;
 import com.ultraship.tms.domain.entity.RefreshToken;
 import com.ultraship.tms.domain.entity.User;
+import com.ultraship.tms.exception.auth.IllegalUserStateException;
 import com.ultraship.tms.exception.auth.InvalidCredentialException;
 import com.ultraship.tms.exception.auth.UserNotVerifiedException;
 import com.ultraship.tms.exception.auth.UsernameAlreadyPresentException;
@@ -20,13 +21,14 @@ import com.ultraship.tms.repository.UserRepository;
 import com.ultraship.tms.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
@@ -44,18 +46,19 @@ public class AuthService {
     private final MailPublisher mailPublisher;
 
 
+    @Transactional
     public boolean signup(SignupInput signupInput) {
-        if (userRepository.findByUsername(signupInput.getUsername()).isPresent()) {
-            throw new UsernameAlreadyPresentException("User already exists");
-        }
-
         User user = new User();
         user.setUsername(signupInput.getUsername());
         user.setPassword(passwordEncoder.encode(signupInput.getPassword()));
         user.setRole(signupInput.getRole());
         user.setVerified(false);
 
-        userRepository.save(user);
+        try {
+            userRepository.save(user);
+        } catch (DataIntegrityViolationException e) {
+            throw new UsernameAlreadyPresentException("User already exists");
+        }
 
         String token = UUID.randomUUID().toString();
 
@@ -77,6 +80,7 @@ public class AuthService {
         return true;
     }
 
+    @Transactional
     public VerifyEmailResponse verifyEmail(String token) {
         EmailVerificationToken verificationToken =
                 emailVerificationTokenRepository.findValidToken(token, LocalDateTime.now())
@@ -92,7 +96,11 @@ public class AuthService {
 
         User user = userRepository
                 .findByUsername(verificationToken.getUsername())
-                .orElseThrow();
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        if (!user.isActive()) {
+            throw new UsernameNotFoundException("User is not active");
+        }
 
         user.setVerified(true);
         userRepository.save(user);
@@ -105,14 +113,12 @@ public class AuthService {
 
     @Transactional
     public boolean resendVerificationEmail(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        Optional<User> optionalUser = userRepository.findByUsername(username);
-
-        if (optionalUser.isEmpty()) {
-            return true; // prevent user enumeration
+        if (!user.isActive()) {
+            throw new UsernameNotFoundException("User is not active");
         }
-
-        User user = optionalUser.get();
 
         if (user.isVerified()) {
             return true;
@@ -144,6 +150,10 @@ public class AuthService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+        if (!user.isActive()) {
+            throw new UsernameNotFoundException("User is not active");
+        }
+
         String token = UUID.randomUUID().toString();
 
         PasswordResetToken resetToken = new PasswordResetToken();
@@ -157,23 +167,28 @@ public class AuthService {
         return true;
     }
 
+    @Transactional
     public ResetPasswordResponse resetPassword(String token, String newPassword) {
 
         PasswordResetToken resetToken =
                 passwordResetTokenRepository.findByToken(token)
-                        .orElseThrow(() -> new RuntimeException("Invalid token"));
+                        .orElseThrow(() -> new InvalidCredentialException("Invalid token"));
 
         if (resetToken.isUsed()) {
-            throw new RuntimeException("Token already used");
+            throw new InvalidCredentialException("Token already used");
         }
 
         if (resetToken.getExpiryDate().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("Token expired");
+            throw new InvalidCredentialException("Token expired");
         }
 
         User user = userRepository
                 .findByUsername(resetToken.getUsername())
-                .orElseThrow();
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        if (!user.isActive()) {
+            throw new UsernameNotFoundException("User is not active");
+        }
 
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
@@ -186,7 +201,9 @@ public class AuthService {
         return new ResetPasswordResponse(user.getUsername(), true);
     }
 
+    @Transactional
     public AuthResponse login(String username, String password) {
+        username = username.trim().toLowerCase();
 
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Invalid credentials"));
@@ -199,12 +216,11 @@ public class AuthService {
             throw new UserNotVerifiedException("User is not verified");
         }
 
-        UserDetails userDetails =
-                org.springframework.security.core.userdetails.User
-                        .withUsername(user.getUsername())
-                        .password(user.getPassword())
-                        .authorities(String.valueOf(user.getRole()))
-                        .build();
+        if (!user.isActive()) {
+            throw new IllegalUserStateException("User is no longer active. Please contact the admin.");
+        }
+
+        UserDetails userDetails = user.toUserDetails();
 
         String accessToken = jwtService.generateAccessToken(userDetails);
         String refreshToken = jwtService.generateRefreshToken(username);
@@ -217,22 +233,20 @@ public class AuthService {
     public AuthResponse refresh(String refreshToken) {
         try {
             RefreshToken token = refreshTokenRepository.findActiveToken(refreshToken, LocalDateTime.now())
-                    .orElseThrow(() -> new RuntimeException("Invalid refresh token"));
+                    .orElseThrow(() -> new InvalidCredentialException("Invalid refresh token"));
 
-            if (token.isRevoked() || token.getExpiryDate().isBefore(LocalDateTime.now())) {
-                throw new RuntimeException("Refresh token expired");
+            if (token.isRevoked()) {
+                throw new InvalidCredentialException("Refresh token expired");
             }
 
             User user = userRepository.findByUsername(token.getUsername())
-                    .orElseThrow();
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-            UserDetails userDetails =
-                    org.springframework.security.core.userdetails.User
-                            .withUsername(user.getUsername())
-                            .password(user.getPassword())
-                            .authorities(String.valueOf(user.getRole()))
-                            .build();
+            if (!user.isActive()) {
+                throw new IllegalUserStateException("User is no longer active. Please contact the admin.");
+            }
 
+            UserDetails userDetails = user.toUserDetails();
             String newAccessToken = jwtService.generateAccessToken(userDetails);
 
             return new AuthResponse(newAccessToken, refreshToken, user.getUsername());
@@ -247,7 +261,7 @@ public class AuthService {
         try {
             RefreshToken token = refreshTokenRepository
                     .findActiveToken(refreshToken, LocalDateTime.now())
-                    .orElseThrow(() -> new RuntimeException("Invalid refresh token"));
+                    .orElseThrow(() -> new InvalidCredentialException("Invalid refresh token"));
 
             token.setRevoked(true);
             refreshTokenRepository.save(token);
